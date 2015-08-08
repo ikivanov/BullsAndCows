@@ -34,7 +34,7 @@
             <tr>
                 <td colspan="4">
                     <button id="guess_button"
-                            data-bind="enable: canGuess, event: {click: Guess}">
+                            data-bind="enable: (isRunning() && isValidInput()), event: {click: Guess}">
                         Make a guess
                     </button>
                 </td>
