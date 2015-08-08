@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title> Bulls and Cows</title>
+</head>
+<body>
+    <div id="workspace"></div>
+
+    <link rel="stylesheet" href="libs/jquery-ui.min.css"/>
+
+    
+    <script type="text/javascript" src="libs/knockout-3.3.0.js"></script>
+    <script type="text/javascript" src="libs/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="libs/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="styles/main.css" />
+    <script type="text/javascript" src="app.js"></script>
+
+    <script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
+    
+    <script type="text/javascript">
+        $(function () {
+            App.Run("workspace");
+        });
+    </script>
+</body>
+</html>

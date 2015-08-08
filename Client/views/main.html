@@ -1,0 +1,65 @@
+﻿<div id="game_root">
+    <h1 class="welcome_title">
+        Welcome to Bulls and Cows!
+    </h1>
+
+    <span class="info_title">Human vs Computer</span>
+
+    <table id="game_table">
+        <tbody>
+            <tr>
+                <td colspan="2">
+                    <button id="new_game_button" data-bind="event: {click: StartNewGame}">Start New Game</button>
+                </td>
+                <td colspan="2">
+                    <button id="surrender_button" data-bind="event: {click: Surrender}, enable: isRunning">Surrender</button>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <input type="number" class="guess_number_textbox" min="1" max="9" data-bind="enable: isRunning, value: number1, event: {change: onValidate}" />
+                </td>
+                <td>
+                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number2, event: {change: onValidate}" />
+                </td>
+                <td>
+                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number3, event: {change: onValidate}" />
+                </td>
+                <td>
+                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number4, event: {change: onValidate}" />
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <button id="guess_button"
+                            data-bind="enable: canGuess, event: {click: Guess}">
+                        Make a guess
+                    </button>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <span class="validation_footer" data-bind="visible: !isValidInput()">Guess number cannot contain duplicating digits!</span>
+                </td>
+
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <select id="server_output" multiple size="12" data-bind="options:guesses"></select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <h5 class="footer">
+        Implemented by <a href="mailto:ikivanov@gmail.com">Ivan Ivanov</a>
+    </h5>
+    <h5 class="footer2">
+        Phone: +359 888 959 386
+    </h5>
+</div>
