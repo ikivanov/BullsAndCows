@@ -1,104 +1,111 @@
 ﻿<div id="game_root">
     <h1 class="welcome_title">
-        Welcome to Bulls and Cows!
+        Welcome to <br />Bulls and Cows!
     </h1>
 
-    <span class="info_title">Multiplayer</span><br />
-    <span class="info_title">Step <span data-bind="text: step() + 1"></span> of 3</span>
+    <div class="info_title">
+        <div>Multiplayer</div>
+        Step <span data-bind="text: step() + 1"></span> of 3
+    </div>
 
     <br />
-    <br />
 
-    <table id="game_table" data-bind="visible: (step() == 0)">
-        <tbody>
-            <tr>
-                <td colspan="2">
-                    1. Enter your nickname:
-                </td>
-                <td colspan="2">
-                    <input type="text" />
-                </td>
-            </tr>
-            <tr>
-                <td><br /></td>
-            </tr>
-            <tr>
-                <td colspan="4" style="text-align:left">
-                    2. Create new game
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <input type="text" />
-                </td>
-                <td colspan="2">
-                    <button id="new_game_button" data-bind="event: {click: CreateGame}">Create Game</button>
-                </td>
-            </tr>
-            <tr>
-                <td><br /></td>
-            </tr>
-            <tr>
-                <td colspan="4" style="text-align:left">
-                    or join an existing one
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <select>
-                        <option>No games</option>
-                    </select>
-                </td>
-                <td colspan="2">
-                    <button id="new_game_button" data-bind="event: {click: JoinGame}">Join Game</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="multiplayer">
+        <table class="game_table-multiplayer" data-bind="visible: (step() == 0)">
+            <tbody>
+                <tr>
+                    <td>
+                        <label> 1. enter your nickname </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><br /></td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align:left">
+                        <label>2. Create new game</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="text" />
+                    </td>
+                    <td colspan="2">
+                        <button id="" data-bind="event: {click: CreateGame}">Create Game</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br /></td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align:left">
+                        <label>or join an existing one</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <select class="full-width">
+                            <option>No games</option>
+                        </select>
+                    </td>
+                    <td colspan="2">
+                        <button id="" data-bind="event: {click: JoinGame}">Join Game</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-    <table class="game_table" data-bind="visible: (step() == 1)">
-        <tbody>
-            <tr>
-                <td colspan=" 2">
-        Room name:
-        </td>
-        <td colspan="2">
-            <label>sample room name</label>
-        </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <button>Add Bot</button>
-            </td>
-            <td colspan="2">
-                <button data-bind="event: {click: LeaveGame}">Leave Game</button>
-            </td>
-        </tr>
-        <tr>
-            <td><br /></td>
-        </tr>
-        <tr>
-            <td colspan="4" style="text-align:left">
-                Players:
-            </td>
-        </tr>
-        <tr>
-            <td colspan="4" style="text-align:left">
-                <select multiple size="5">
-                    <option>Me</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td><br /></td>
-        </tr>
-        <tr>
-            <td colspan="4">
-                <button data-bind="event: {click: StartGame}">Start Game!</button>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="multiplayer">
+        <table class="game_table" data-bind="visible: (step() == 1)">
+            <tbody>
+                <tr>
+                    <td colspan=" 2">
+                        <label>Room name:</label>
+                    </td>
+                    <td colspan="2">
+                        <label>sample room name</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button>Add Bot</button>
+                    </td>
+                    <td colspan="2">
+                        <button data-bind="event: {click: LeaveGame}">Leave Game</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br /></td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align:left">
+                        <label>Players:</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align:left">
+                        <select class="full-width" multiple size="5">
+                            <option>Me</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br /></td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="text-center">
+                        <button data-bind="event: {click: StartGame}">Start Game!</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <table class="game_table" data-bind="visible: (step() == 2)">
         <tbody>

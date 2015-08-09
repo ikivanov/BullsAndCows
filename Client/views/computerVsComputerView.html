@@ -1,9 +1,12 @@
 ﻿<div id="game_root">
     <h1 class="welcome_title">
-        Welcome to Bulls and Cows!
+        Welcome to <br />Bulls and Cows!
     </h1>
 
-    <span class="info_title">Computer vs Computer</span>
+    <div class="info_title">
+        <div>Single Player:</div>
+        Computer vs Computer
+    </div>
 
     <table class="game_table">
         <tbody>
@@ -15,7 +18,14 @@
 
             <tr>
                 <td colspan="4">
-                    <select id="server_output" multiple size="12" data-bind="options:guesses"></select>
+                    <div class="game_table_moves">
+                        <select id="server_output" multiple size="12" data-bind="options:guesses"></select>
+
+                        <div class="thinking_progress" data-bind="visible: isThinking">
+                            <img src="../img/waiting.gif" />
+                            <span>Thinking...</span>
+                        </div>
+                    </div>
                 </td>
             </tr>
         </tbody>
@@ -28,9 +38,4 @@
     <h5 class="footer2">
         Phone: +359 888 959 386
     </h5>
-</div>
-
-<div id="thinking_progress" data-bind="visible: isThinking">
-    <img src="../img/waiting.gif" />
-    <span>Thinking...</span>
 </div>
