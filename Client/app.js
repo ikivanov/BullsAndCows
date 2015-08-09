@@ -24,11 +24,8 @@
     var render = function (hostElement) {
         var that = this;
 
-        hostElement.load("views\\humanVsComputerView.html", function () {
-            ko.applyBindings(new HumanVsComputerViewModel());
+        hostElement.load("views\\computerVsComputerView.html", function () {
+            ko.applyBindings(new ComputerVsComputerViewModel());
         });
     }
-
-    var GameViewModel = function () {
-    };
 })();

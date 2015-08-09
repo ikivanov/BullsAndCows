@@ -1,0 +1,36 @@
+﻿<div id="game_root">
+    <h1 class="welcome_title">
+        Welcome to Bulls and Cows!
+    </h1>
+
+    <span class="info_title">Computer vs Computer</span>
+
+    <table id="game_table">
+        <tbody>
+            <tr>
+                <td colspan="2">
+                    <button id="new_game_button" data-bind="event: {click: StartNewGame}">Start New Game</button>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <select id="server_output" multiple size="12" data-bind="options:guesses"></select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <h5 class="footer">
+        Implemented by <a href="mailto:ikivanov@gmail.com">Ivan Ivanov</a>
+    </h5>
+    <h5 class="footer2">
+        Phone: +359 888 959 386
+    </h5>
+</div>
+
+<div id="thinking_progress" data-bind="visible: isThinking">
+    <img src="../img/waiting.gif" />
+    <span>Thinking...</span>
+</div>

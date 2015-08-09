@@ -67,6 +67,7 @@
   <ItemGroup>
     <Content Include="app.js" />
     <Content Include="img\background.png" />
+    <Content Include="img\waiting.gif" />
     <Content Include="index.html" />
     <Content Include="libs\images\ui-bg_diagonals-thick_18_b81900_40x40.png" />
     <Content Include="libs\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
@@ -89,7 +90,9 @@
     <Content Include="libs\jquery-ui.theme.min.css" />
     <Content Include="libs\knockout-3.3.0.js" />
     <Content Include="styles\main.css" />
+    <Content Include="viewModels\computerVsComputerViewModel.js" />
     <Content Include="viewModels\humanVsComputerViewModel.js" />
+    <Content Include="views\computerVsComputerView.html" />
     <Content Include="views\humanVsComputerView.html" />
     <Content Include="Web.config" />
   </ItemGroup>
