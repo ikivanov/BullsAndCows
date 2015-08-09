@@ -17,11 +17,12 @@
     <link rel="stylesheet" href="styles/main.css" />
     <script type="text/javascript" src="viewModels/humanVsComputerViewModel.js"></script>
     <script type="text/javascript" src="viewModels/computerVsComputerViewModel.js"></script>
+    <script type="text/javascript" src="viewModels/multiplayerViewModel.js"></script>
     <script type="text/javascript" src="app.js"></script>
     
     <script type="text/javascript">
         $(function () {
-            App.Run("workspace");
+            App.Run("workspace", App.playerModes.MULTIPLAYER);
         });
     </script>
 </body>

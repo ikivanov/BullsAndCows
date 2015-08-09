@@ -1,0 +1,150 @@
+﻿<div id="game_root">
+    <h1 class="welcome_title">
+        Welcome to Bulls and Cows!
+    </h1>
+
+    <span class="info_title">Multiplayer</span><br />
+    <span class="info_title">Step <span data-bind="text: step() + 1"></span> of 3</span>
+
+    <br />
+    <br />
+
+    <table id="game_table" data-bind="visible: (step() == 0)">
+        <tbody>
+            <tr>
+                <td colspan="2">
+                    1. Enter your nickname:
+                </td>
+                <td colspan="2">
+                    <input type="text" />
+                </td>
+            </tr>
+            <tr>
+                <td><br /></td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:left">
+                    2. Create new game
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="text" />
+                </td>
+                <td colspan="2">
+                    <button id="new_game_button" data-bind="event: {click: CreateGame}">Create Game</button>
+                </td>
+            </tr>
+            <tr>
+                <td><br /></td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:left">
+                    or join an existing one
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <select>
+                        <option>No games</option>
+                    </select>
+                </td>
+                <td colspan="2">
+                    <button id="new_game_button" data-bind="event: {click: JoinGame}">Join Game</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="game_table" data-bind="visible: (step() == 1)">
+        <tbody>
+            <tr>
+                <td colspan=" 2">
+        Room name:
+        </td>
+        <td colspan="2">
+            <label>sample room name</label>
+        </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button>Add Bot</button>
+            </td>
+            <td colspan="2">
+                <button data-bind="event: {click: LeaveGame}">Leave Game</button>
+            </td>
+        </tr>
+        <tr>
+            <td><br /></td>
+        </tr>
+        <tr>
+            <td colspan="4" style="text-align:left">
+                Players:
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" style="text-align:left">
+                <select multiple size="5">
+                    <option>Me</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><br /></td>
+        </tr>
+        <tr>
+            <td colspan="4">
+                <button data-bind="event: {click: StartGame}">Start Game!</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <table class="game_table" data-bind="visible: (step() == 2)">
+        <tbody>
+            <tr>
+                <td>
+                    <input type="number" class="guess_number_textbox" min="1" max="9" data-bind="enable: isRunning, value: number1, event: {change: onValidate}" />
+                </td>
+                <td>
+                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number2, event: {change: onValidate}" />
+                </td>
+                <td>
+                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number3, event: {change: onValidate}" />
+                </td>
+                <td>
+                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number4, event: {change: onValidate}" />
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <button id="guess_button"
+                            data-bind="enable: (isRunning() && isValidInput()), event: {click: Guess}">
+                        Make a guess
+                    </button>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <span class="validation_footer" data-bind="visible: !isValidInput()">Guess number cannot contain duplicating digits!</span>
+                </td>
+
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <select id="server_output" multiple size="12" data-bind="options:guesses"></select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h5 class="footer">
+        Implemented by <a href="mailto:ikivanov@gmail.com">Ivan Ivanov</a>
+    </h5>
+    <h5 class="footer2">
+        Phone: +359 888 959 386
+    </h5>
+</div>

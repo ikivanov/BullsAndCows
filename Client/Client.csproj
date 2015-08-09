@@ -92,8 +92,10 @@
     <Content Include="styles\main.css" />
     <Content Include="viewModels\computerVsComputerViewModel.js" />
     <Content Include="viewModels\humanVsComputerViewModel.js" />
+    <Content Include="viewModels\multiplayerViewModel.js" />
     <Content Include="views\computerVsComputerView.html" />
     <Content Include="views\humanVsComputerView.html" />
+    <Content Include="views\multiplayerView.html" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

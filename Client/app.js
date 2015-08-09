@@ -48,6 +48,7 @@
     PlayerModeFactory.modes = {};
     PlayerModeFactory.modes[App.playerModes.HUMAN_VS_COMPUTER] = new PlayerMode("views\\humanVsComputerView.html", HumanVsComputerViewModel);
     PlayerModeFactory.modes[App.playerModes.COMPUTER_VS_COMPUTER] = new PlayerMode("views\\computerVsComputerView.html", ComputerVsComputerViewModel);
+    PlayerModeFactory.modes[App.playerModes.MULTIPLAYER] = new PlayerMode("views\\multiplayerView.html", MultiplayerViewModel);
 
     PlayerModeFactory.Create = function (mode) {
         if (!PlayerModeFactory.modes[mode]) {
