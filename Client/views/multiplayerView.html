@@ -20,7 +20,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <input type="text" />
+                        <input type="text" data-bind="value: nickname, valueUpdate: 'keyup'" />
                     </td>
                 </tr>
                 <tr>
@@ -33,10 +33,10 @@
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <input type="text" />
+                        <input type="text" data-bind="value: gameName, valueUpdate: 'keyup'" />
                     </td>
                     <td colspan="2">
-                        <button id="" data-bind="event: {click: CreateGame}">Create Game</button>
+                        <button id="" data-bind="enable: (nickname().length > 0 && gameName().length > 0), event: {click: CreateGame}">Create Game</button>
                     </td>
                 </tr>
                 <tr>
@@ -49,12 +49,11 @@
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <select class="full-width">
-                            <option>No games</option>
-                        </select>
+                        <select class="full-width" data-bind="options: gamesList, optionsText: 'name', value: selectedGame, enable: gamesList().length > 0"></select>
                     </td>
                     <td colspan="2">
-                        <button id="" data-bind="event: {click: JoinGame}">Join Game</button>
+                        <!--<span data-bind="text: selectedGame().name"></span>-->
+                        <button data-bind="enable: (nickname().length > 0 && selectedGame()), event: {click: JoinGame}">Join Game</button>
                     </td>
                 </tr>
             </tbody>
@@ -66,18 +65,15 @@
             <tbody>
                 <tr>
                     <td colspan=" 2">
-                        <label>Room name:</label>
+                        <label>Game name:</label>
                     </td>
                     <td colspan="2">
-                        <label>sample room name</label>
+                        <label data-bind="text: gameName"></label>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2">
-                        <button>Add Bot</button>
-                    </td>
-                    <td colspan="2">
-                        <button data-bind="event: {click: LeaveGame}">Leave Game</button>
+                    <td colspan="4">
+                        <button data-bind="event: {click: AddBot}">Add Bot</button>
                     </td>
                 </tr>
                 <tr>
@@ -90,9 +86,7 @@
                 </tr>
                 <tr>
                     <td colspan="4" style="text-align:left">
-                        <select class="full-width" multiple size="5">
-                            <option>Me</option>
-                        </select>
+                        <select class="full-width" multiple size="5" data-bind="options: gamePlayers"></select>
                     </td>
                 </tr>
                 <tr>
@@ -143,6 +137,16 @@
             <tr>
                 <td colspan="4">
                     <select id="server_output" multiple size="12" data-bind="options:guesses"></select>
+
+                    <div class="awaiting_game_progress" data-bind="visible: (isRunning() == false)">
+                        <img src="../img/waiting.gif" />
+                        <span>Awaiting game start...</span>
+                    </div>
+
+                    <div class="awaiting_turn_progress" data-bind="visible: false">
+                        <img src="../img/waiting.gif" />
+                        <span>Please wait for your turn...</span>
+                    </div>
                 </td>
             </tr>
         </tbody>

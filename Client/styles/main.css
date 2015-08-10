@@ -140,7 +140,41 @@ label {
     margin-top: -27px;
 }
 
-    .thinking_progress img {
-        width: 32px;
-        vertical-align: middle;
-    }
+.thinking_progress img {
+    width: 32px;
+    vertical-align: middle;
+}
+
+.awaiting_game_progress {
+    position: absolute;
+    border: 1px solid;
+    top: 50%;
+    left: 50%;
+    vertical-align: middle;
+    background-color: #55A0E2;
+    margin-left: -110px;
+    padding: 10px;
+    margin-top: -27px;
+}
+
+.awaiting_game_progress img {
+    width: 32px;
+    vertical-align: middle;
+}
+
+.awaiting_turn_progress {
+    position: absolute;
+    border: 1px solid;
+    top: 50%;
+    left: 50%;
+    vertical-align: middle;
+    background-color: #55A0E2;
+    margin-left: -120px;
+    padding: 10px;
+    margin-top: -27px;
+}
+
+.awaiting_turn_progress img {
+    width: 32px;
+    vertical-align: middle;
+}

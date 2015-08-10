@@ -40,7 +40,10 @@ var Server = (function () {
         JOIN_GAME_RESPONSE_EVENT: "join game response",
 
         LIST_GAMES_EVENT: "list games",
-        LIST_GAME_RESPONSE_EVENT: "list games response",
+        LIST_GAMES_RESPONSE_EVENT: "list games response",
+        
+        LIST_GAME_PLAYERS_EVENT: "list players",
+        LIST_GAME_PLAYERS_RESPONSE_EVENT: "list players response",
 
         POST_NUMBER_EVENT: "post number",
         POST_NUMBER_RESPONSE_EVENT: "post number response"
@@ -63,11 +66,11 @@ var Server = (function () {
 
             that.io.on('connection', function (socket) {
                 socket.on(events.CREATE_GAME_EVENT, function (data) {
-                    that.createGame(socket, data);
+                    that.createGame(socket, data); //create channel with id = roomId
                 });
 
                 socket.on(events.JOIN_GAME_EVENT, function (data) {
-                    that.joinGame(socket, data);
+                    that.joinGame(socket, data); //join channel with id = roomId
                 });
 
                 socket.on(events.START_GAME_EVENT, function (data) {
@@ -76,6 +79,10 @@ var Server = (function () {
 
                 socket.on(events.LIST_GAMES_EVENT, function (data) {
                     that.listGames(socket, data);
+                });
+
+                socket.on(events.LIST_GAME_PLAYERS_EVENT, function (data) {
+                    that.listPlayers(socket, data);
                 });
 
                 socket.on(events.SURRENDER_GAME_EVENT, function (data) {
@@ -128,6 +135,8 @@ var Server = (function () {
                 
                 that.runningGames[game.id] = game;
                 
+                socket.join(game.id)
+
                 socket.emit(events.CREATE_GAME_RESPONSE_EVENT, {
                     success: true,
                     gameId: game.id, 
@@ -155,7 +164,7 @@ var Server = (function () {
             var game = this.runningGames[gameId];
             if (!that.ensurePlayer(socket, game, playerToken, events.START_GAME_RESPONSE_EVENT)) return;
             
-            socket.emit(events.START_GAME_RESPONSE_EVENT, {
+            that.io.to(game.id).emit(events.START_GAME_RESPONSE_EVENT, {
                 success: true,
                 msg: consts.STARTED_GAME_SUCCESS_MSG
             });
@@ -228,43 +237,99 @@ var Server = (function () {
             });
         },
         
-        //================================================
-
         //joins a player to an existing game
         //this method has public access, everyone is allowed to call it
         joinGame: function (socket, data) {
             var gameId = data.gameId;
             var game = that.runningGames[gameId];
             if (!game) {
-                socket.emit(events.JOIN_GAME_ERROR_RESULT_EVENT, {
+                socket.emit(events.JOIN_GAME_RESPONSE_EVENT, {
+                    success: false,
                     msg: consts.JOIN_GAME_ERROR
                 });
 
                 return;
             }
             
+            var nickname = data.nickname;
             var player = game.createPlayer(nickname, false);
             
             try {
                 game.addPlayer(player);
             }
             catch (e) {
-                socket.emit(events.JOIN_GAME_ERROR_RESULT_EVENT, {
+                socket.emit(events.JOIN_GAME_RESPONSE_EVENT, {
+                    success: false,
                     msg: e
                 });
                 return;
             }
+            
+            socket.join(game.id);
 
-            socket.emit(events.JOIN_GAME_SUCCESS_RESULT_EVENT, {
+            that.io.to(game.id).emit(events.JOIN_GAME_RESPONSE_EVENT, {
+                success: true,
+                nickname: player.nickname,
                 msg: consts.JOIN_GAME_SUCCESS
             });
         },
         
-        //lists all available games
+        //lists all available non-runing, multiplayer games
         //this method has public access, everyone is allowed to call it
         listGames: function (socket, data) {
-            //TODO:
+            var type = data.type;
+            var gamesList = [];
+
+            for (var id in that.runningGames) {
+                var game = that.runningGames[id];
+
+                if (game.isStarted && game.type != type) continue;
+
+                gamesList.push({
+                    id: game.id,
+                    name: game.name
+                });
+            }
+
+            socket.emit(events.LIST_GAMES_RESPONSE_EVENT, {
+                success: true,
+                gamesList: gamesList,
+                msg: "OK"
+            });
         },
+        
+        //lists all players who join the current game
+        //this method has private access, only the creator of the current game is allowed to call it
+        listPlayers: function (socket, data) {
+            var gameId = data.gameId;
+            var playerToken = data.playerToken;
+            
+            if (!that.ensureGame(socket, gameId, events.LIST_GAME_PLAYERS_RESPONSE_EVENT)) return;
+            
+            var game = this.runningGames[gameId];
+            if (!that.ensurePlayer(socket, game, playerToken, events.LIST_GAME_PLAYERS_RESPONSE_EVENT)) return;
+            
+            var player = game.getPlayerByTokenKey(playerToken);
+            if (!player.isGameCreator) {
+                socket.emit(events.LIST_GAME_PLAYERS_RESPONSE_EVENT, {
+                    success: false,
+                    msg: "Only the creator of the game is allowed to list the game's players!"
+                });
+                return;
+            }
+
+            var players = [];
+            
+            for (var i = 0; i < game.players.length; i++) {
+                players.push(game.players[i].nickname);
+            }
+            
+            socket.emit(events.LIST_GAME_PLAYERS_RESPONSE_EVENT, {
+                success: true,
+                msg: "OK!",
+                players: players
+            });
+        }, 
         
         //posts a secret number, this method is relevant for Peer 2 Peer game mode only
         //this method has private access, only players joined the current game are allowed to call it
