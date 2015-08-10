@@ -121,7 +121,7 @@
             <tr>
                 <td colspan="4">
                     <button id="guess_button"
-                            data-bind="enable: (isRunning() && isValidInput()), event: {click: Guess}">
+                            data-bind="enable: (isRunning() && isValidInput() && isMyTurn()), event: {click: Guess}">
                         Make a guess
                     </button>
                 </td>
@@ -138,12 +138,12 @@
                 <td colspan="4">
                     <select id="server_output" multiple size="12" data-bind="options:guesses"></select>
 
-                    <div class="awaiting_game_progress" data-bind="visible: (isRunning() == false)">
+                    <div class="awaiting_game_progress" data-bind="visible: (!isRunning() && !isGameOver())">
                         <img src="../img/waiting.gif" />
                         <span>Awaiting game start...</span>
                     </div>
 
-                    <div class="awaiting_turn_progress" data-bind="visible: false">
+                    <div class="awaiting_turn_progress" data-bind="visible: (isRunning() && !isMyTurn())">
                         <img src="../img/waiting.gif" />
                         <span>Please wait for your turn...</span>
                     </div>

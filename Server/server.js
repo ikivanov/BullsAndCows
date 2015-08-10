@@ -1,4 +1,5 @@
 ﻿var Game = require("./game").Game;
+var GameType = require("./game").gameType;
 var Player = require("./player").Player;
 var Token = require("./token").Token;
 
@@ -46,7 +47,9 @@ var Server = (function () {
         LIST_GAME_PLAYERS_RESPONSE_EVENT: "list players response",
 
         POST_NUMBER_EVENT: "post number",
-        POST_NUMBER_RESPONSE_EVENT: "post number response"
+        POST_NUMBER_RESPONSE_EVENT: "post number response",
+
+        PLAYER_TURN_SERVER_EVENT: "player turn"
     };
 
     var Server = function (io) {
@@ -168,6 +171,16 @@ var Server = (function () {
                 success: true,
                 msg: consts.STARTED_GAME_SUCCESS_MSG
             });
+
+            //send PLAYER_TURN_SERVER_EVENT to all the players of the room
+            if (game.type == GameType.MULTIPLAYER || game.type == GameType.PEER_2_PEER) {
+                
+                var player = game.getNextTurnPlayer();
+
+                that.io.to(game.id).emit(events.PLAYER_TURN_SERVER_EVENT, {
+                    nickname: player.nickname
+                });
+            }
         },
 
         //surrenders an existing game
@@ -208,7 +221,7 @@ var Server = (function () {
 
             var player = game.getPlayerByTokenKey(playerToken);
 
-            if (!game.isPlayerTurn(player)) {
+            if (player != game.getNextTurnPlayer()) {
                 socket.emit(events.GUESS_NUMBER_RESPONSE_EVENT, {
                     success: false,
                     msg: "It is not your turn!"
@@ -222,19 +235,29 @@ var Server = (function () {
                 return;
             }
             
-            var bullscows = game.checkGuessNumber(guessNum);
+            var bullscows = game.checkGuessNumber(player, guessNum);
             if (bullscows.bulls == 4) {
                 that.gameOver(socket, gameId, true);
                 
                 return;
             }
             
-            socket.emit(events.GUESS_NUMBER_RESPONSE_EVENT, {
+            that.io.to(game.id).emit(events.GUESS_NUMBER_RESPONSE_EVENT, {
                 success: true,
                 number: guessNum, 
                 bulls: bullscows.bulls, 
                 cows: bullscows.cows
             });
+
+            //send PLAYER_TURN_SERVER_EVENT to all the players of the room
+            if (game.type == GameType.MULTIPLAYER || game.type == GameType.PEER_2_PEER) {
+                
+                var player = game.getNextTurnPlayer();
+                
+                that.io.to(game.id).emit(events.PLAYER_TURN_SERVER_EVENT, {
+                    nickname: player.nickname
+                });
+            }
         },
         
         //joins a player to an existing game
@@ -269,6 +292,8 @@ var Server = (function () {
 
             that.io.to(game.id).emit(events.JOIN_GAME_RESPONSE_EVENT, {
                 success: true,
+                gameId: gameId,
+                playerToken: player.token.key,
                 nickname: player.nickname,
                 msg: consts.JOIN_GAME_SUCCESS
             });
@@ -351,7 +376,7 @@ var Server = (function () {
 
         gameOver: function (socket, gameId, win) {
             var game = this.runningGames[gameId];
-            socket.emit(events.GAME_OVER_EVENT, { gameId: gameId, number: game.secretNumber, win: win });
+            that.io.to(game.id).emit(events.GAME_OVER_EVENT, { gameId: gameId, number: game.secretNumber, win: win });
             
             this.runningGames[gameId] = null;
             delete this.runningGames[gameId];

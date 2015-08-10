@@ -11,12 +11,13 @@
         socket = io(consts.SERVER_ADDRESS);
         that.step = ko.observable(0);
         that.isRunning = ko.observable(false);
+        that.isMyTurn = ko.observable(false);
         that.number1 = ko.observable(1),
         that.number2 = ko.observable(2),
         that.number3 = ko.observable(3),
         that.number4 = ko.observable(4)
-        isValidInput= ko.observable(true),
-        guesses = ko.observableArray()
+        that.isValidInput = ko.observable(true),
+        that.guesses = ko.observableArray()
 
         that.nickname = ko.observable("");
         that.gameName = ko.observable("");
@@ -25,6 +26,10 @@
         that.gamePlayers = ko.observableArray();
 
         that.selectedGame = ko.observable();
+
+        that.isGameOver = ko.observable(false);
+
+        that.bots = [],
 
         socket.on("create game response", function (data) {
             that.onGameCreated(data);
@@ -44,6 +49,18 @@
 
         socket.on("start game response", function (data) {
             that.onGameStarted(data);
+        });
+
+        socket.on("player turn", function (data) {
+            that.onPlayerTurn(data);
+        });
+
+        socket.on("guess number response", function (data) {
+            that.onGuessResponse(data);
+        });
+
+        socket.on("game over", function (data) {
+            that.onGameOver(data);
         });
 
         that.ListGames();
@@ -106,6 +123,9 @@
             }
 
             if (that.nickname() == data.nickname) { //current user has joined the game, go to step 2
+                that.gameId = data.gameId;
+                that.playerToken = data.playerToken;
+
                 that.step(2);
             } else { //another use has joined the game, update the player list
                 that.ListPlayers();
@@ -147,8 +167,40 @@
             that.step(2);
         },
 
-        Guess: function() {
+        onPlayerTurn: function(data) {
+            if (data.nickname == that.nickname()) {
+                that.isMyTurn(true);
+            } else if (that.bots.length > 0) {
+                for (var i = 0; i < that.bots.length; i++) {
+                    var bot = that.bots[i];
+                    if (bot.nickname == that.nickname()) {
+                        bot.Guess();
+                    }
+                }
+            }
+        },
 
+        Guess: function() {
+            if (!that.isValidNumber()) {
+                alert("Guess number cannot contain duplicating digits!");
+                return;
+            }
+
+            socket.emit("guess number", { //TODO: refactor (extract const)
+                gameId: that.gameId,
+                playerToken: that.playerToken,
+                number: [that.number1(), that.number2(), that.number3(), that.number4()]
+            });
+
+            that.isMyTurn(false);
+        },
+
+        onGuessResponse: function(data) {
+            var gameId = data.gameId;
+            var bulls = data.bulls, cows = data.cows;
+            var number = data.number;
+
+            that.guesses.push("number: " + number.join('') + ", bulls: " + bulls + ", cows: " + cows);
         },
 
         AddBot: function() {
@@ -156,8 +208,37 @@
         },
 
         onValidate: function () {
+            that.isValidInput(that.isValidNumber());
+        },
 
-        }
+        isValidNumber: function () {
+            if (that.number1() == 0) {
+                return false;
+            }
+
+            var result =
+                that.number1() != that.number2() &&
+                that.number1() != that.number3() &&
+                that.number1() != that.number4() &&
+                that.number2() != that.number3() &&
+                that.number2() != that.number4() &&
+                that.number3() != that.number4();
+
+            return result;
+        },
+
+        onGameOver: function (data) {
+            that.isGameOver(true);
+            that.isRunning(false);
+
+            var winStr = data.win ? "win" : "lose";
+            var result = "Game over! You " + winStr + "! Number is: " + data.number.join('');
+            alert(result);
+            that.guesses.push(result);
+
+            that.gameId = "";
+        },
+
     };
 
     return MultiplayerViewModel;

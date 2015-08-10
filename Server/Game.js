@@ -30,7 +30,7 @@ var Game = (function () {
         this.secretNumber = generateSecretNumber();
 
         this.numberOfMoves = 0;
-        this.currentPlayer = 0;
+        this.currentPlayerIndex = 0;
         this.players = [];
 
         this.isStarted = false;
@@ -101,16 +101,15 @@ var Game = (function () {
             return nickname;
         },
         
-        isPlayerTurn: function (player) {
-            //TODO: implement
-            return true;
+        getNextTurnPlayer: function () {
+            return that.players[that.currentPlayerIndex];
         },
 
         start: function () {
             this.isStarted = true;
         },
     
-        checkGuessNumber: function (guessNumber) {
+        checkGuessNumber: function (player, guessNumber) {
             var bulls = 0, cows = 0;
             
             for (var i = 0; i < guessNumber.length; i++) {
@@ -131,6 +130,14 @@ var Game = (function () {
                 bulls: bulls, cows: cows
             }
             
+            if (that.type != gameType.SINGLE_PLAYER) {
+                if (that.currentPlayerIndex == that.players.length - 1) {
+                    that.currentPlayerIndex = 0;
+                } else {
+                    that.currentPlayerIndex++;
+                }
+            }
+
             that.numberOfMoves++;
             
             return res;
