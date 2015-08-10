@@ -16,18 +16,24 @@
         socket = io(consts.SERVER_ADDRESS);
 
         that.gameId = "";
+        that.playerToken = "";
 
-        socket.on("game started", function (data) {
+        socket.on("create game response", function (data) {
+            that.onGameCreated(data);
+        });
+
+        socket.on("start game response", function (data) {
             that.onGameStarted(data);
+        });
+
+        socket.on("guess number response", function (data) {
+            that.onGuessResponse(data);
         });
 
         socket.on("game over", function (data) {
             that.onGameOver(data);
         });
 
-        socket.on("guess response", function (data) {
-            that.onGuessResponse(data);
-        });
     };
 
     ComputerVsComputerViewModel.prototype = {
@@ -37,9 +43,32 @@
         guesses: ko.observableArray(),
         answers: [],
 
+        CreateNewGame: function () {
+            socket.emit("create game", { //TODO: refactor (extract const)
+                name: "unknown_h_vs_c",
+                nickname: "guest",
+                type: 0 //TODO: refactor
+            });
+        },
+
+        onGameCreated: function (data) {
+            var success = data.success;
+            if (!success) {
+                alert(data.msg);
+                return;
+            }
+
+            that.gameId = data.gameId;
+            that.playerToken = data.playerToken;
+
+            socket.emit("start game", { //TODO: refactor (extract const)
+                gameId: that.gameId,
+                playerToken: that.playerToken
+            });
+        },
+
         onGameStarted: function (data) {
             that.isRunning(true);
-            that.gameId = data.gameId;
             that.guesses.removeAll();
 
             that.answers = that.getPermutations(consts.NUMBER_LENGH, "123456789");
@@ -78,7 +107,11 @@
             that.isThinking(true);
             setTimeout(function () {
                 that.isThinking(false);
-                socket.emit("guess", { gameId: that.gameId, number: [arr[0], arr[1], arr[2], arr[3]] });
+                socket.emit("guess number", {
+                    gameId: that.gameId,
+                    playerToken: that.playerToken,
+                    number: [arr[0], arr[1], arr[2], arr[3]]
+                });
             }, 1500);
         },
 
@@ -137,10 +170,6 @@
             }
 
             return array;
-        },
-
-        StartNewGame: function () {
-            socket.emit("start new game", {});
         }
     };
 

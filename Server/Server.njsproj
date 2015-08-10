@@ -31,6 +31,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
+    <Compile Include="game.js" />
+    <Compile Include="player.js" />
+    <Compile Include="server.js" />
+    <Compile Include="token.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
   </ItemGroup>

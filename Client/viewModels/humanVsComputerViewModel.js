@@ -20,17 +20,22 @@
         socket = io(consts.SERVER_ADDRESS);
 
         that.gameId = "";
+        that.playerToken = "";
 
-        socket.on("game started", function (data) {
+        socket.on("create game response", function (data) {
+            that.onGameCreated(data);
+        });
+
+        socket.on("start game response", function (data) {
             that.onGameStarted(data);
+        });
+
+        socket.on("guess number response", function (data) {
+            that.onGuessResponse(data);
         });
 
         socket.on("game over", function (data) {
             that.onGameOver(data);
-        });
-
-        socket.on("guess response", function (data) {
-            that.onGuessResponse(data);
         });
     };
 
@@ -46,9 +51,32 @@
         number3: ko.observable(3),
         number4: ko.observable(4),
 
+        CreateNewGame: function () {
+            socket.emit("create game", { //TODO: refactor (extract const)
+                name: "unknown_h_vs_c",
+                nickname: "guest",
+                type: 0 //TODO: refactor
+            });
+        },
+
+        onGameCreated: function (data) {
+            var success = data.success;
+            if (!success) {
+                alert(data.msg);
+                return;
+            }
+
+            that.gameId = data.gameId;
+            that.playerToken = data.playerToken;
+
+            socket.emit("start game", { //TODO: refactor (extract const)
+                gameId: that.gameId,
+                playerToken: that.playerToken
+            });
+        },
+
         onGameStarted: function (data) {
             that.isRunning(true);
-            that.gameId = data.gameId;
             that.guesses.removeAll();
             that.number1(1);
             that.number2(2);
@@ -56,14 +84,17 @@
             that.number4(4);
         },
 
-        onGameOver: function (data) {
-            that.isRunning(false);
-            var winStr = data.win ? "win" : "lose";
-            var result = "Game over! You " + winStr + "! Number is: " + data.number.join('');
-            alert(result);
-            that.guesses.push(result);
+        Guess: function () {
+            if (!that.isValidNumber()) {
+                alert("Guess number cannot contain duplicating digits!");
+                return;
+            }
 
-            that.gameId = "";
+            socket.emit("guess number", { //TODO: refactor (extract const)
+                gameId: that.gameId,
+                playerToken: that.playerToken,
+                number: [that.number1(), that.number2(), that.number3(), that.number4()]
+            });
         },
 
         onGuessResponse: function (data) {
@@ -74,23 +105,23 @@
             that.guesses.push("number: " + number.join('') + ", bulls: " + bulls + ", cows: " + cows);
         },
 
-        StartNewGame: function () {
-            socket.emit("start new game", {});
-        },
-
         Surrender: function () {
-            socket.emit("game surrender", { gameId: this.gameId });
+            socket.emit("surrender game", {
+                gameId: this.gameId,
+                playerToken: this.playerToken
+            });
 
             that.isRunning(false);
         },
 
-        Guess: function () {
-            if (!that.isValidNumber()) {
-                alert("Guess number cannot contain duplicating digits!");
-                return;
-            }
+        onGameOver: function (data) {
+            that.isRunning(false);
+            var winStr = data.win ? "win" : "lose";
+            var result = "Game over! You " + winStr + "! Number is: " + data.number.join('');
+            alert(result);
+            that.guesses.push(result);
 
-            socket.emit("guess", { gameId: this.gameId, number: [this.number1(), this.number2(), this.number3(), this.number4()] });
+            that.gameId = "";
         },
 
         onValidate: function () {
