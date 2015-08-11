@@ -13,7 +13,7 @@
         that.socket = socket;
         that.gameId = gameId;
         that.playerToken = playerToken;
-        that.nickname = nickname ? nickname : "botPlayer_" + Date().getTime();;
+        that.nickname = nickname ? nickname : "botPlayer_" + Date().getTime();
 
         that.socket.on("guess number response", function (data) {
             that.onGuessResponse(data);
@@ -21,6 +21,10 @@
 
         that.socket.on("player turn", function (data) {
             that.onPlayerTurn(data);
+        });
+
+        that.socket.on("join game response", function (data) {
+            that.onGameJoined(data);
         });
 
         that.answers = that.getPermutations(consts.NUMBER_LENGH, "123456789");
@@ -31,7 +35,7 @@
         constructor: BotPlayer,
 
         joinGame: function(gameId) {
-            socket.emit("join game", { //TODO: refactor (extract const)
+            that.socket.emit("join game", { //TODO: refactor (extract const)
                 gameId: gameId,
                 nickname: that.nickname
             });
@@ -44,7 +48,7 @@
             }
 
             //bug: nickname can be changed from server if there is another user with the same nickname!
-            if (that.nickname == data.nickname) { //current user has joined the game, go to step 2
+            if (that.nickname == data.nickname) { 
                 that.gameId = data.gameId;
                 that.playerToken = data.playerToken;
             }
@@ -52,12 +56,7 @@
 
         onPlayerTurn: function (data) {
             if (data.nickname == that.nickname) {
-
-                that.viewModel.showThinkingProgress(true);
-                setTimeout(function () {
-                    that.viewModel.showThinkingProgress(false);
-                    that.guess();
-                }, 1500);
+                that.guess();
             }
         },
 
@@ -77,9 +76,11 @@
             var bulls = data.bulls, cows = data.cows;
             var number = data.number;
 
-            that.reduceAnswers(that.answers[0], bulls, cows);
+            that.reduceAnswers(number.join(''), bulls, cows);
 
-            that.viewModel.onGuessResponse(data);
+            if (that.viewModel) {
+                that.viewModel.onGuessResponse(data);
+            }
         },
 
         reduceAnswers: function (guess, bulls, cows) {

@@ -49,7 +49,10 @@ var Server = (function () {
         POST_NUMBER_EVENT: "post number",
         POST_NUMBER_RESPONSE_EVENT: "post number response",
 
-        PLAYER_TURN_SERVER_EVENT: "player turn"
+        PLAYER_TURN_SERVER_EVENT: "player turn",
+
+        CHECK_NICKNAME_EXISTS_EVENT: "nickname exists",
+        CHECK_NICKNAME_EXISTS_RESPONSE_EVENT: "nickname exists response"
     };
 
     var Server = function (io) {
@@ -98,6 +101,10 @@ var Server = (function () {
 
                 socket.on(events.POST_NUMBER_EVENT, function (data) {
                     that.postSecretNumber(socket, data);
+                });
+
+                socket.on(events.CHECK_NICKNAME_EXISTS_EVENT, function (data) {
+                    that.checkNicknameExists(socket, data);
                 });
             });
         },
@@ -240,6 +247,7 @@ var Server = (function () {
             }
             
             that.io.to(game.id).emit(events.GUESS_NUMBER_RESPONSE_EVENT, {
+                nickname: player.nickname,
                 success: true,
                 number: guessNum, 
                 bulls: bullscows.bulls, 
@@ -247,10 +255,10 @@ var Server = (function () {
             });
 
             //send PLAYER_TURN_SERVER_EVENT to all the players of the room
-            var player = game.getNextTurnPlayer();
+            var nextTurnPlayer = game.getNextTurnPlayer();
                 
             that.io.to(game.id).emit(events.PLAYER_TURN_SERVER_EVENT, {
-                nickname: player.nickname
+                nickname: nextTurnPlayer.nickname
             });
         },
         
@@ -349,6 +357,22 @@ var Server = (function () {
                 players: players
             });
         }, 
+        
+        checkNicknameExists: function(socket, data) {
+            var gameId = data.gameId;
+            var nickname = data.nickname;
+
+            if (!that.ensureGame(socket, gameId, events.CHECK_NICKNAME_EXISTS_RESPONSE_EVENT)) return;
+            
+            var game = this.runningGames[gameId];
+            var exists = game.nicknameExists(nickname);
+
+            socket.emit(events.CHECK_NICKNAME_EXISTS_RESPONSE_EVENT, {
+                success: true,
+                msg: "This nickname is already in use!",
+                exists: exists
+            });
+        },
         
         //posts a secret number, this method is relevant for Peer 2 Peer game mode only
         //this method has private access, only players joined the current game are allowed to call it

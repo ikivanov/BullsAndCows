@@ -94,7 +94,7 @@ var Game = (function () {
 
             var suffix = 2;
             while (that.nicknameExists(nickname)) {
-                nickname + suffix;
+                nickname += suffix;
                 suffix++;
             }
 

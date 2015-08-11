@@ -19,6 +19,8 @@
         that.isValidInput = ko.observable(true),
         that.guesses = ko.observableArray()
 
+        that.isGameCreator = false;
+
         that.nickname = ko.observable("");
         that.gameName = ko.observable("");
         that.gamesList = ko.observableArray();
@@ -63,6 +65,10 @@
             that.onGameOver(data);
         });
 
+        socket.on("nickname exists response", function (data) {
+            that.onNicknameExistsResponse(data);
+        });
+
         that.ListGames();
     };
 
@@ -103,12 +109,27 @@
             that.gameId = data.gameId;
             that.playerToken = data.playerToken;
 
+            that.isGameCreator = true;
+
             that.ListPlayers();
 
             that.step(1);
         },
 
         JoinGame: function () {
+            socket.emit("nickname exists", { //TODO: refactor (extract const)
+                gameId: that.selectedGame().id,
+                nickname: that.nickname()
+            });
+        },
+
+        onNicknameExistsResponse: function (data) {
+            var exists = data.exists;
+            if (exists) {
+                alert(data.msg);
+                return;
+            }
+
             socket.emit("join game", { //TODO: refactor (extract const)
                 gameId: that.selectedGame().id,
                 nickname: that.nickname()
@@ -127,8 +148,10 @@
                 that.playerToken = data.playerToken;
 
                 that.step(2);
-            } else { //another use has joined the game, update the player list
-                that.ListPlayers();
+            } else { //another user has joined the game, update the player list
+                if (that.isGameCreator) {
+                    that.ListPlayers();
+                }
             }
         },
 
@@ -170,13 +193,6 @@
         onPlayerTurn: function(data) {
             if (data.nickname == that.nickname()) {
                 that.isMyTurn(true);
-            } else if (that.bots.length > 0) {
-                for (var i = 0; i < that.bots.length; i++) {
-                    var bot = that.bots[i];
-                    if (bot.nickname == that.nickname()) {
-                        bot.Guess();
-                    }
-                }
             }
         },
 
@@ -196,15 +212,18 @@
         },
 
         onGuessResponse: function(data) {
-            var gameId = data.gameId;
             var bulls = data.bulls, cows = data.cows;
             var number = data.number;
 
-            that.guesses.push("number: " + number.join('') + ", bulls: " + bulls + ", cows: " + cows);
+            that.guesses.push(data.nickname + ": " + number.join('') + ", bulls: " + bulls + ", cows: " + cows);
         },
 
-        AddBot: function() {
-            alert('Not implemented!');
+        AddBot: function () {
+            var botSocket = io.connect(consts.SERVER_ADDRESS, { 'forceNew': true });
+            var nickname = "botPlayer_" + new Date().getTime();
+
+            var bot = new BotPlayer(null, botSocket, that.gameId, nickname);
+            bot.joinGame(that.gameId);
         },
 
         onValidate: function () {
