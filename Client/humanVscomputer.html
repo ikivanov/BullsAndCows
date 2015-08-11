@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title> Bulls and Cows</title>
+</head>
+<body>
+    <div id="workspace"></div>
+
+    <link rel="stylesheet" href="libs/jquery-ui.min.css"/>
+
+    
+    <script type="text/javascript" src="libs/knockout-3.3.0.js"></script>
+    <script type="text/javascript" src="libs/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="libs/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="libs/socket.io-1.3.5.js"></script>
+
+    <link rel="stylesheet" href="styles/main.css" />
+    <script type="text/javascript" src="js/botPlayer.js"></script>
+    <script type="text/javascript" src="viewModels/humanVsComputerViewModel.js"></script>
+    <script type="text/javascript" src="viewModels/computerVsComputerViewModel.js"></script>
+    <script type="text/javascript" src="viewModels/multiplayerViewModel.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+    
+    <script type="text/javascript">
+        $(function () {
+            App.Run("workspace", App.playerModes.HUMAN_VS_COMPUTER);
+        });
+    </script>
+</body>
+</html>

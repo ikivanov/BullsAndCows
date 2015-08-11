@@ -66,9 +66,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="app.js" />
+    <Content Include="computerVscomputer.html" />
     <Content Include="img\background.png" />
     <Content Include="img\waiting.gif" />
-    <Content Include="index.html" />
+    <Content Include="humanVscomputer.html" />
     <Content Include="js\botPlayer.js" />
     <Content Include="libs\images\ui-bg_diagonals-thick_18_b81900_40x40.png" />
     <Content Include="libs\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
@@ -90,6 +91,8 @@
     <Content Include="libs\jquery-ui.structure.min.css" />
     <Content Include="libs\jquery-ui.theme.min.css" />
     <Content Include="libs\knockout-3.3.0.js" />
+    <Content Include="libs\socket.io-1.3.5.js" />
+    <Content Include="multiplayer.html" />
     <Content Include="styles\main.css" />
     <Content Include="viewModels\computerVsComputerViewModel.js" />
     <Content Include="viewModels\humanVsComputerViewModel.js" />
