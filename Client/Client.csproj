@@ -69,6 +69,7 @@
     <Content Include="img\background.png" />
     <Content Include="img\waiting.gif" />
     <Content Include="index.html" />
+    <Content Include="js\botPlayer.js" />
     <Content Include="libs\images\ui-bg_diagonals-thick_18_b81900_40x40.png" />
     <Content Include="libs\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
     <Content Include="libs\images\ui-bg_flat_10_000000_40x100.png" />

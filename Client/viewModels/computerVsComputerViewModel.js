@@ -1,10 +1,9 @@
 ﻿var ComputerVsComputerViewModel = (function () {
     var consts = {
-        SERVER_ADDRESS: "localhost:1337",
-        NUMBER_LENGH: 4
+        SERVER_ADDRESS: "localhost:1337"
     };
 
-    var that, socket;
+    var that;
 
     var ComputerVsComputerViewModel = function () {
         that = this;
@@ -13,27 +12,15 @@
         that.guesses = ko.observableArray();
         that.isThinking = ko.observable(false);
 
-        socket = io(consts.SERVER_ADDRESS);
+        that.gameName = "h_vs_c";
+        that.nickname = "botPlayer_" + new Date().getTime();
+
+        that.socket = null;;
 
         that.gameId = "";
         that.playerToken = "";
 
-        socket.on("create game response", function (data) {
-            that.onGameCreated(data);
-        });
-
-        socket.on("start game response", function (data) {
-            that.onGameStarted(data);
-        });
-
-        socket.on("guess number response", function (data) {
-            that.onGuessResponse(data);
-        });
-
-        socket.on("game over", function (data) {
-            that.onGameOver(data);
-        });
-
+        that.botPlayer = null;
     };
 
     ComputerVsComputerViewModel.prototype = {
@@ -43,10 +30,28 @@
         guesses: ko.observableArray(),
         answers: [],
 
+        initSocket: function() {
+            that.socket = io.connect(consts.SERVER_ADDRESS, {'forceNew': true});
+
+            that.socket.on("create game response", function (data) {
+                that.onGameCreated(data);
+            });
+
+            that.socket.on("start game response", function (data) {
+                that.onGameStarted(data);
+            });
+
+            that.socket.on("game over", function (data) {
+                that.onGameOver(data);
+            });
+        },
+
         CreateNewGame: function () {
-            socket.emit("create game", { //TODO: refactor (extract const)
-                name: "unknown_h_vs_c",
-                nickname: "guest",
+            that.initSocket();
+
+            that.socket.emit("create game", { //TODO: refactor (extract const)
+                name: that.gameName,
+                nickname: that.nickname,
                 type: 0 //TODO: refactor
             });
         },
@@ -61,7 +66,9 @@
             that.gameId = data.gameId;
             that.playerToken = data.playerToken;
 
-            socket.emit("start game", { //TODO: refactor (extract const)
+            that.botPlayer = new BotPlayer(that, that.socket, that.gameId, that.nickname, that.playerToken);
+
+            that.socket.emit("start game", { //TODO: refactor (extract const)
                 gameId: that.gameId,
                 playerToken: that.playerToken
             });
@@ -70,11 +77,6 @@
         onGameStarted: function (data) {
             that.isRunning(true);
             that.guesses.removeAll();
-
-            that.answers = that.getPermutations(consts.NUMBER_LENGH, "123456789");
-            that.answers = that.shuffle(that.answers);
-
-            that.guess();
         },
 
         onGameOver: function (data) {
@@ -84,92 +86,20 @@
             that.guesses.push(result);
 
             that.gameId = "";
+
+            that.socket.disconnect();
+            that.socket = null;
         },
 
         onGuessResponse: function (data) {
-            var gameId = data.gameId;
             var bulls = data.bulls, cows = data.cows;
             var number = data.number;
 
             that.guesses.push("number: " + number.join('') + ", bulls: " + bulls + ", cows: " + cows);
-
-            that.reduceAnswers(that.answers[0], bulls, cows);
-
-            setTimeout(function () {
-                that.guess();
-            }, 1000);
         },
 
-        guess: function () {
-            var guessNum = that.answers[0];
-            var arr = guessNum.split('');
-
-            that.isThinking(true);
-            setTimeout(function () {
-                that.isThinking(false);
-                socket.emit("guess number", {
-                    gameId: that.gameId,
-                    playerToken: that.playerToken,
-                    number: [arr[0], arr[1], arr[2], arr[3]]
-                });
-            }, 1500);
-        },
-
-        reduceAnswers: function(guess, bulls, cows) {
-            for (var i = that.answers.length - 1; i >= 0; i--)
-            {
-                var tb = 0, tc = 0;
-                for (var ix = 0; ix < consts.NUMBER_LENGH; ix++)
-                if (that.answers[i][ix] == guess[ix])
-                    tb++;
-                else if (that.answers[i].indexOf(guess[ix]) >= 0)
-                    tc++;
-                if ((tb != bulls) || (tc != cows))
-                    that.answers.splice(i, 1);
-            }
-        },
-
-        getPermutations: function (n, word) {
-            var tmpPermutation = [];
-
-            if (!word || word.length == 0 || n <= 0)
-            {
-                tmpPermutation.push("");
-            }
-            else
-            {
-                for (var i = 0; i < word.length; i++)
-                {
-                    var tmpWord = word.substr(0, i) + word.substr(i + 1);
-                    var perms = that.getPermutations(n - 1, tmpWord);
-                    for (var j = 0; j < perms.length; j++)
-                    {
-                        var item = perms[j];
-                        tmpPermutation.push(word[i] + item);
-                    }
-                }
-            }
-
-            return tmpPermutation;
-        },
-
-        //Fisher–Yates Shuffle
-        shuffle: function (array) {
-            var m = array.length, t, i;
-
-            // While there remain elements to shuffle…
-            while (m) {
-
-                // Pick a remaining element…
-                i = Math.floor(Math.random() * m--);
-
-                // And swap it with the current element.
-                t = array[m];
-                array[m] = array[i];
-                array[i] = t;
-            }
-
-            return array;
+        showThinkingProgress: function (visible) {
+            that.isThinking(visible);
         }
     };
 

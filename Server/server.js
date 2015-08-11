@@ -173,14 +173,11 @@ var Server = (function () {
             });
 
             //send PLAYER_TURN_SERVER_EVENT to all the players of the room
-            if (game.type == GameType.MULTIPLAYER || game.type == GameType.PEER_2_PEER) {
-                
-                var player = game.getNextTurnPlayer();
+            var player = game.getNextTurnPlayer();
 
-                that.io.to(game.id).emit(events.PLAYER_TURN_SERVER_EVENT, {
-                    nickname: player.nickname
-                });
-            }
+            that.io.to(game.id).emit(events.PLAYER_TURN_SERVER_EVENT, {
+                nickname: player.nickname
+            });
         },
 
         //surrenders an existing game
@@ -250,14 +247,11 @@ var Server = (function () {
             });
 
             //send PLAYER_TURN_SERVER_EVENT to all the players of the room
-            if (game.type == GameType.MULTIPLAYER || game.type == GameType.PEER_2_PEER) {
+            var player = game.getNextTurnPlayer();
                 
-                var player = game.getNextTurnPlayer();
-                
-                that.io.to(game.id).emit(events.PLAYER_TURN_SERVER_EVENT, {
-                    nickname: player.nickname
-                });
-            }
+            that.io.to(game.id).emit(events.PLAYER_TURN_SERVER_EVENT, {
+                nickname: player.nickname
+            });
         },
         
         //joins a player to an existing game
