@@ -1,7 +1,7 @@
 ﻿var http = require('http');
 var GameServer = require('./server').Server;
 
-var consts = require('././consts.js').consts;
+var consts = require('./consts.js').consts;
 
 var port = consts.SERVER_PORT;
 
