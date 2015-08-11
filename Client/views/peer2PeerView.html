@@ -1,0 +1,166 @@
+﻿<div id="game_root">
+    <h1 class="welcome_title">
+        Welcome to <br />Bulls and Cows!
+    </h1>
+
+    <div class="info_title">
+        <div>Peer 2 Peer</div>
+        Step <span data-bind="text: step() + 1"></span> of 3
+    </div>
+
+    <br />
+
+    <div class="multiplayer">
+        <table class="game_table-multiplayer" data-bind="visible: (step() == 0)">
+            <tbody>
+                <tr>
+                    <td>
+                        <label> 1. Enter your secret number </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" data-bind="value: secretNumber, valueUpdate: 'keyup'" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label> 2. Enter your nickname </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" data-bind="value: nickname, valueUpdate: 'keyup'" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><br /></td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align:left">
+                        <label>3. Create new game</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="text" data-bind="value: gameName, valueUpdate: 'keyup'" />
+                    </td>
+                    <td colspan="2">
+                        <button id="" data-bind="enable: (secretNumber().length == 4 && secretNumber()[0] != 0 && nickname().length > 0 && gameName().length > 0), event: {click: CreateGame}">Create Game</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br /></td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align:left">
+                        <label>or join an existing one</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <select class="full-width" data-bind="options: gamesList, optionsText: 'name', value: selectedGame, enable: gamesList().length > 0"></select>
+                    </td>
+                    <td colspan="2">
+                        <!--<span data-bind="text: selectedGame().name"></span>-->
+                        <button data-bind="enable: (secretNumber().length == 4 && secretNumber()[0] != 0 && nickname().length > 0 && selectedGame()), event: {click: JoinGame}">Join Game</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="multiplayer">
+        <table class="game_table" data-bind="visible: (step() == 1)">
+            <tbody>
+                <tr>
+                    <td colspan=" 2">
+                        <label>Game name:</label>
+                    </td>
+                    <td colspan="2">
+                        <label data-bind="text: gameName"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br /></td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align:left">
+                        <label>Players:</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align:left">
+                        <select class="full-width" multiple size="5" data-bind="options: gamePlayers"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br /></td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="text-center">
+                        <button data-bind="event: {click: StartGame}">Start Game!</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <table class="game_table" data-bind="visible: (step() == 2)">
+        <tbody>
+            <tr>
+                <td>
+                    <input type="number" class="guess_number_textbox" min="1" max="9" data-bind="enable: isRunning, value: number1, event: {change: onValidate}" />
+                </td>
+                <td>
+                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number2, event: {change: onValidate}" />
+                </td>
+                <td>
+                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number3, event: {change: onValidate}" />
+                </td>
+                <td>
+                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number4, event: {change: onValidate}" />
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <button id="guess_button"
+                            data-bind="enable: (isRunning() && isValidInput() && isMyTurn()), event: {click: Guess}">
+                        Make a guess
+                    </button>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <span class="validation_footer" data-bind="visible: !isValidInput()">Guess number cannot contain duplicating digits!</span>
+                </td>
+
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <select id="server_output" multiple size="12" data-bind="options:guesses"></select>
+
+                    <div class="awaiting_game_progress" data-bind="visible: (!isRunning() && !isGameOver())">
+                        <img src="../img/waiting.gif" />
+                        <span>Awaiting game start...</span>
+                    </div>
+
+                    <div class="awaiting_turn_progress" data-bind="visible: (isRunning() && !isMyTurn())">
+                        <img src="../img/waiting.gif" />
+                        <span>Please wait for your turn...</span>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h5 class="footer">
+        Implemented by <a href="mailto:ikivanov@gmail.com">Ivan Ivanov</a>
+    </h5>
+    <h5 class="footer2">
+        Phone: +359 888 959 386
+    </h5>
+</div>

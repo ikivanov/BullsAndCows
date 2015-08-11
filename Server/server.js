@@ -52,6 +52,14 @@ var Server = (function () {
                     that.guessNumber(socket, data);
                 });
 
+                socket.on(events.GUESS_PEER_NUMBER_EVENT, function (data) {
+                    that.guessPeerNumber(socket, data);
+                });
+
+                socket.on(events.GUESS_PEER_NUMBER_CLIENT_RESPONSE_EVENT, function (data) {
+                    that.guessPeerNumberClientResponse(socket, data);
+                });
+
                 socket.on(events.POST_NUMBER_EVENT, function (data) {
                     that.postSecretNumber(socket, data);
                 });
@@ -227,6 +235,49 @@ var Server = (function () {
             });
         },
         
+        guessPeerNumber: function (socket, data) {
+            var that = this;
+            
+            var gameId = data.gameId;
+            var playerToken = data.playerToken;
+            var guessNum = data.number;
+            
+            if (!that.ensureGame(socket, gameId, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
+            
+            var game = that.runningGames[gameId];
+            if (!that.ensurePlayer(socket, game, playerToken, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
+            
+            var player = game.getPlayerByTokenKey(playerToken);
+            
+            if (player != game.getNextTurnPlayer()) {
+                socket.emit(events.GUESS_NUMBER_RESPONSE_EVENT, {
+                    success: false,
+                    msg: "It is not your turn!"
+                });
+                return;
+            }
+            
+            socket.broadcast.to(game.id).emit(events.GUESS_PEER_NUMBER_SERVER_EVENT, {
+                number: data.number
+            });
+        },
+        
+        guessPeerNumberClientResponse: function (socket, data) {
+            var that = this;
+
+            var gameId = data.gameId;
+            var playerToken = data.playerToken;
+
+            if (!that.ensureGame(socket, gameId, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
+            
+            var game = that.runningGames[gameId];
+            if (!that.ensurePlayer(socket, game, playerToken, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
+            
+            socket.broadcast.to(game.id).emit(events.GUESS_PEER_NUMBER_RESPONSE_EVENT, {
+                number: data.number
+            });
+        },
+        
         //joins a player to an existing game
         //this method has public access, everyone is allowed to call it
         joinGame: function (socket, data) {
@@ -279,7 +330,7 @@ var Server = (function () {
             for (var id in that.runningGames) {
                 var game = that.runningGames[id];
 
-                if (game.isStarted && game.type != type) continue;
+                if (game.isStarted || game.type != type) continue;
 
                 gamesList.push({
                     id: game.id,

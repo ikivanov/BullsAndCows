@@ -42,6 +42,11 @@
         GUESS_NUMBER_EVENT: "guess number",
         GUESS_NUMBER_RESPONSE_EVENT: "guess number response",
 
+        GUESS_PEER_NUMBER_EVENT: "guess peer number",
+        GUESS_PEER_NUMBER_SERVER_EVENT: "check peer number",
+        GUESS_PEER_NUMBER_CLIENT_RESPONSE_EVENT: "check peer number response",
+        GUESS_PEER_NUMBER_RESPONSE_EVENT: "guess peer number response",
+
         GAME_OVER_EVENT: "game over",
 
         JOIN_GAME_EVENT: "join game",
