@@ -6,7 +6,6 @@ Contents
 3. Implementation Details
 4. Future Improvements
 
-
 ===== 1. Installation========
 
 1. clone BullsAndCows repo locally
@@ -23,6 +22,21 @@ from the command line, which will install all required modules
 	Task 4) http://[appRoot]/peer2peer.html
 	
 Task 4 is partly implemented!!!
+
+==================================================
+IMPORTANT!!! IMPORTANT!!! IMPORTANT!!! IMPORTANT!!!
+
+I setup the server (only the nodejs part) to run on a Virtual Machine on Amazon Web Services. If you want to use this preconfigured server instead of setuping it locally:
+
+open ./Client/js/consts and change the config.SERVER_ADDRESS from localhost:8080 to 52.28.211.2:8080
+
+Then open some of the above described web pages.
+
+Note, that you might need to turn of your Firewall if you use Windows!!!
+
+IMPORTANT!!! IMPORTANT!!! IMPORTANT!!! IMPORTANT!!!
+
+=================================================
 
 Alternatively, you can open the solution by Visual Studio 2013 Community Edition with Node.js Tools for Visual Studio installed (https://www.visualstudio.com/en-us/features/node-js-vs.aspx)
 To do so, find the BullsAndCows.sln file in the root of the solution folder and open it. Right-click on the solution and select properties. In the Properties dialog select "Multiple Startup projects and for "Server" and "Client" projects in the list below select Start. Set as Start Page one of the above described home pages and hit F5. Enjoy!
