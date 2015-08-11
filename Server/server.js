@@ -1,67 +1,20 @@
 ﻿var Game = require("./game").Game;
-var GameType = require("./game").gameType;
 var Player = require("./player").Player;
 var Token = require("./token").Token;
+
+var events = require("./consts").events;
+var consts = require("./consts").consts;
 
 //Server class is responsible for low level socket comunication
 //and delegates most of the business logic to the Game and Player classes
 var Server = (function () {
-    var that;
-    
-    var consts = {
-        CREATED_GAME_SUCCESS_MSG: "A new game has been created!",
-        CREATED_GAME_ERROR_MSG: "An error occured while creating a game!",
-
-        STARTED_GAME_SUCCESS_MSG: "A new game has been started!",
-        
-        JOIN_GAME_SUCCESS_MSG: "New player has joind the game!",
-        JOIN_GAME_ERROR_MSG: "The game you are trying to join does not exists or just expired!",
-        SURRENDER_GAME_ERROR_MSG: "You are trying to surrender the game by using an invalid nickname or you are not the creator of the game! Only game creators are allowed to surrender it!",
-
-        GAME_NOT_FOUND_MSG: "Game does not exist or has been expired!",
-        PLAYER_NOT_FOUND_MSG: "Player does not exist or has been expired!"
-    };
-    
-    var events = {
-        CREATE_GAME_EVENT: "create game",
-        CREATE_GAME_RESPONSE_EVENT: "create game response",
-        
-        START_GAME_EVENT: "start game",
-        START_GAME_RESPONSE_EVENT: "start game response",
-
-        SURRENDER_GAME_EVENT: "surrender game",
-        SURRENDER_GAME_RESPONSE_EVENT: "surrender game response",
-
-        GUESS_NUMBER_EVENT: "guess number",
-        GUESS_NUMBER_RESPONSE_EVENT: "guess number response",
-        
-        GAME_OVER_EVENT: "game over",
-
-        JOIN_GAME_EVENT: "join game",
-        JOIN_GAME_RESPONSE_EVENT: "join game response",
-
-        LIST_GAMES_EVENT: "list games",
-        LIST_GAMES_RESPONSE_EVENT: "list games response",
-        
-        LIST_GAME_PLAYERS_EVENT: "list players",
-        LIST_GAME_PLAYERS_RESPONSE_EVENT: "list players response",
-
-        POST_NUMBER_EVENT: "post number",
-        POST_NUMBER_RESPONSE_EVENT: "post number response",
-
-        PLAYER_TURN_SERVER_EVENT: "player turn",
-
-        CHECK_NICKNAME_EXISTS_EVENT: "nickname exists",
-        CHECK_NICKNAME_EXISTS_RESPONSE_EVENT: "nickname exists response"
-    };
-
     var Server = function (io) {
-        that = this;
+        var that = this;
 
-        this.io = io;
-        this.runningGames = {};
+        that.io = io;
+        that.runningGames = {};
 
-        this.initSocketIO();
+        that.initSocketIO();
     };
     
     Server.prototype = {
@@ -110,6 +63,8 @@ var Server = (function () {
         },
         
         ensureGame: function (socket, gameId, eventName) {
+            var that = this;
+
             var game = that.runningGames[gameId];
             if (!game) {
                 socket.emit(eventName, {
@@ -123,6 +78,8 @@ var Server = (function () {
         },
         
         ensurePlayer: function(socket, game, playerToken, eventName) {
+            var that = this;
+
             var player = game.getPlayerByTokenKey(playerToken);
             if (!player) {
                 socket.emit(eventName, {
@@ -138,6 +95,8 @@ var Server = (function () {
         //creates new game with one player, the game creator
         //this method has public access, everyone is allowed to call it
         createGame: function (socket, data) {
+            var that = this;
+
             try {
                 var game = new Game(data.name, data.type);
                 var player = game.createPlayer(data.nickname, true);
@@ -166,12 +125,14 @@ var Server = (function () {
         //starts an existing game        
         //this method has private access, only game creator is allowed to call it
         startGame: function (socket, data) {
+            var that = this;
+
             var gameId = data.gameId;
             var playerToken = data.playerToken;
             
             if (!that.ensureGame(socket, gameId, events.START_GAME_RESPONSE_EVENT)) return;
             
-            var game = this.runningGames[gameId];
+            var game = that.runningGames[gameId];
             if (!that.ensurePlayer(socket, game, playerToken, events.START_GAME_RESPONSE_EVENT)) return;
             
             that.io.to(game.id).emit(events.START_GAME_RESPONSE_EVENT, {
@@ -190,12 +151,14 @@ var Server = (function () {
         //surrenders an existing game
         //this method has private access, only game creator is allowed to call it
         surrenderGame: function (socket, data) {
+            var that = this;
+
             var gameId = data.gameId;
             var playerToken = data.playerToken;
             
             if (!that.ensureGame(socket, gameId, events.SURRENDER_GAME_RESPONSE_EVENT)) return;
 
-            var game = this.runningGames[gameId];
+            var game = that.runningGames[gameId];
             if (!that.ensurePlayer(socket, game, playerToken, events.SURRENDER_GAME_RESPONSE_EVENT)) return;
 
             var player = game.getPlayerByTokenKey(playerToken);
@@ -214,13 +177,15 @@ var Server = (function () {
         //this method has private access, only players joined the current game are allowed to call it
         //additionaly, in mutiplayer mode, only the player who is on move is allowed to call the method
         guessNumber: function (socket, data) {
+            var that = this;
+
             var gameId = data.gameId;
             var playerToken = data.playerToken;
             var guessNum = data.number;
             
             if (!that.ensureGame(socket, gameId, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
             
-            var game = this.runningGames[gameId];
+            var game = that.runningGames[gameId];
             if (!that.ensurePlayer(socket, game, playerToken, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
 
             var player = game.getPlayerByTokenKey(playerToken);
@@ -265,6 +230,8 @@ var Server = (function () {
         //joins a player to an existing game
         //this method has public access, everyone is allowed to call it
         joinGame: function (socket, data) {
+            var that = this;
+
             var gameId = data.gameId;
             var game = that.runningGames[gameId];
             if (!game) {
@@ -304,6 +271,8 @@ var Server = (function () {
         //lists all available non-runing, multiplayer games
         //this method has public access, everyone is allowed to call it
         listGames: function (socket, data) {
+            var that = this;
+
             var type = data.type;
             var gamesList = [];
 
@@ -328,12 +297,14 @@ var Server = (function () {
         //lists all players who join the current game
         //this method has private access, only the creator of the current game is allowed to call it
         listPlayers: function (socket, data) {
+            var that = this;
+
             var gameId = data.gameId;
             var playerToken = data.playerToken;
             
             if (!that.ensureGame(socket, gameId, events.LIST_GAME_PLAYERS_RESPONSE_EVENT)) return;
             
-            var game = this.runningGames[gameId];
+            var game = that.runningGames[gameId];
             if (!that.ensurePlayer(socket, game, playerToken, events.LIST_GAME_PLAYERS_RESPONSE_EVENT)) return;
             
             var player = game.getPlayerByTokenKey(playerToken);
@@ -359,12 +330,14 @@ var Server = (function () {
         }, 
         
         checkNicknameExists: function(socket, data) {
+            var that = this;
+
             var gameId = data.gameId;
             var nickname = data.nickname;
 
             if (!that.ensureGame(socket, gameId, events.CHECK_NICKNAME_EXISTS_RESPONSE_EVENT)) return;
             
-            var game = this.runningGames[gameId];
+            var game = that.runningGames[gameId];
             var exists = game.nicknameExists(nickname);
 
             socket.emit(events.CHECK_NICKNAME_EXISTS_RESPONSE_EVENT, {
@@ -393,11 +366,13 @@ var Server = (function () {
         },
 
         gameOver: function (socket, gameId, win) {
-            var game = this.runningGames[gameId];
+            var that = this;
+
+            var game = that.runningGames[gameId];
             that.io.to(game.id).emit(events.GAME_OVER_EVENT, { gameId: gameId, number: game.secretNumber, win: win });
             
-            this.runningGames[gameId] = null;
-            delete this.runningGames[gameId];
+            that.runningGames[gameId] = null;
+            delete that.runningGames[gameId];
         }
     };
     

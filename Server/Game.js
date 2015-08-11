@@ -1,45 +1,35 @@
 ﻿var Player = require("./player").Player;
 var Token = require("./token").Token;
 
+var consts = require("./consts").consts;
+var gameType = require("./consts").gameType;
+
 var uuid = require('uuid');
 
-var gameType = {
-    SINGLE_PLAYER: 0,
-    MULTIPLAYER: 1,
-    PEER_2_PEER: 2
-}
-
-exports.gameType = gameType;
-
-var consts = {
-    NUMBER_SIZE: 4,
-    EXPIRATION_TIME_MINUTES: 120 
-};
-
 var Game = (function () {
-    var that;
-
     var Game = function (name, type) {
-        that = this;
+        var that = this;
 
-        this.id = uuid.v4();
+        that.id = uuid.v4();
 
-        this.name = name;
-        this.type = type;
+        that.name = name;
+        that.type = type;
         
-        this.secretNumber = generateSecretNumber();
+        that.secretNumber = generateSecretNumber();
 
-        this.numberOfMoves = 0;
-        this.currentPlayerIndex = 0;
-        this.players = [];
+        that.numberOfMoves = 0;
+        that.currentPlayerIndex = 0;
+        that.players = [];
 
-        this.isStarted = false;
+        that.isStarted = false;
     };
     
     Game.prototype = {
         constructor: Game,
         
         createPlayer: function(nickname, isGameCreator) {
+            var that = this;
+
             var nick = that.ensureNickname(nickname);
             
             var expirationTime = new Date().getTime() + consts.EXPIRATION_TIME_MINUTES * 60 * 1000;
@@ -50,15 +40,17 @@ var Game = (function () {
         },
 
         addPlayer: function (player) {
+            var that = this;
+
             if (!player) return;
             
-            if (this.type == gameType.SINGLE_PLAYER) {
-                if (this.players.length == 1) {
+            if (that.type == gameType.SINGLE_PLAYER) {
+                if (that.players.length == 1) {
                     throw new Error("This game is a single player game. No more that one player can join it!");
                 }
             }
 
-            this.players.push(player);
+            that.players.push(player);
         },
 
         removePlayer: function (nickname) {
@@ -66,8 +58,10 @@ var Game = (function () {
         },
         
         getPlayerByTokenKey: function (tokenKey) {
-            for (var i = 0; i < this.players.length; i++) {
-                var player = this.players[i];
+            var that = this;
+
+            for (var i = 0; i < that.players.length; i++) {
+                var player = that.players[i];
                 
                 if (player.token.key === tokenKey) {
                     return player;
@@ -78,6 +72,8 @@ var Game = (function () {
         },
 
         nicknameExists: function (nickname) {
+            var that = this;
+
             for (var i = 0; i < that.players.length; i++) {
                 if (nickname == that.players[i].nickname) {
                     return true;
@@ -88,6 +84,8 @@ var Game = (function () {
         },
 
         ensureNickname: function (nickname) {
+            var that = this;
+
             if (!nickname) {
                 nickname = "guest";
             }
@@ -102,14 +100,20 @@ var Game = (function () {
         },
         
         getNextTurnPlayer: function () {
+            var that = this;
+
             return that.players[that.currentPlayerIndex];
         },
 
         start: function () {
-            this.isStarted = true;
+            var that = this;
+
+            that.isStarted = true;
         },
     
         checkGuessNumber: function (player, guessNumber) {
+            var that = this;
+
             var bulls = 0, cows = 0;
             
             for (var i = 0; i < guessNumber.length; i++) {
@@ -145,6 +149,8 @@ var Game = (function () {
     };
     
     var generateSecretNumber = function () {
+        var that = this;
+
         var result = [];
         
         for (var i = 0; i < consts.NUMBER_SIZE; i++) {

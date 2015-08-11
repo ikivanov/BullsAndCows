@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
+    <Compile Include="consts.js" />
     <Compile Include="game.js" />
     <Compile Include="player.js" />
     <Compile Include="server.js" />

@@ -1,9 +1,11 @@
 ﻿var Player = (function () {
     
     var Player = function (nickname, token, isGameCreator) {
-        this.nickname = nickname;
-        this.token = token;
-        this.isGameCreator = isGameCreator;
+        var that = this;
+
+        that.nickname = nickname;
+        that.token = token;
+        that.isGameCreator = isGameCreator;
     };
     
     Player.prototype = {
