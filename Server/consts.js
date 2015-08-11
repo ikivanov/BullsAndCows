@@ -1,5 +1,7 @@
 ﻿(function () {
     var consts = {
+        SERVER_PORT: 8080,
+
         CREATED_GAME_SUCCESS_MSG: "A new game has been created!",
         CREATED_GAME_ERROR_MSG: "An error occured while creating a game!",
     

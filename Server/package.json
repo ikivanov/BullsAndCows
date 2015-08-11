@@ -2,7 +2,7 @@
   "name": "Server",
   "version": "0.0.0",
   "description": "Server",
-  "main": "server.js",
+  "main": "app.js",
   "author": {
     "name": "ikivanov",
     "email": ""

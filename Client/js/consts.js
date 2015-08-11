@@ -2,7 +2,7 @@
 
 (function () {
     var config = {
-        SERVER_ADDRESS: "localhost:1337"
+        SERVER_ADDRESS: "localhost:8080"
     };
     App.config = config;
 
