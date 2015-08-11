@@ -1,12 +1,8 @@
 ﻿var HumanVsComputerViewModel = (function () {
-    var consts = {
-        SERVER_ADDRESS: "localhost:1337",
-    };
-
-    var that, socket;
-
     var HumanVsComputerViewModel = function () {
         that = this;
+
+        that.socket = null;
 
         that.isRunning = ko.observable(false);
         that.isValidInput = ko.observable(true);
@@ -17,25 +13,25 @@
         that.number3 = ko.observable(3);
         that.number4 = ko.observable(4);
 
-        socket = io(consts.SERVER_ADDRESS);
-
         that.gameId = "";
         that.playerToken = "";
 
-        socket.on("create game response", function (data) {
-            that.onGameCreated(data);
+        that.socket = io.connect(App.config.SERVER_ADDRESS, { 'forceNew': true });
+
+        that.socket.on(App.events.CREATE_GAME_RESPONSE_EVENT, function (data) {
+            $.proxy(that.onGameCreated(data), that);
         });
 
-        socket.on("start game response", function (data) {
-            that.onGameStarted(data);
+        that.socket.on(App.events.START_GAME_RESPONSE_EVENT, function (data) {
+            $.proxy(that.onGameStarted(data), that);
         });
 
-        socket.on("guess number response", function (data) {
-            that.onGuessResponse(data);
+        that.socket.on(App.events.GUESS_NUMBER_RESPONSE_EVENT, function (data) {
+            $.proxy(that.onGuessResponse(data), that);
         });
 
-        socket.on("game over", function (data) {
-            that.onGameOver(data);
+        that.socket.on(App.events.GAME_OVER_EVENT, function (data) {
+            $.proxy(that.onGameOver(data), that);
         });
     };
 
@@ -52,14 +48,18 @@
         number4: ko.observable(4),
 
         CreateNewGame: function () {
-            socket.emit("create game", { //TODO: refactor (extract const)
+            var that = this;
+
+            that.socket.emit(App.events.CREATE_GAME_EVENT, {
                 name: "unknown_h_vs_c",
                 nickname: "guest",
-                type: 0 //TODO: refactor
+                type: App.gameType.SINGLE_PLAYER
             });
         },
 
         onGameCreated: function (data) {
+            var that = this;
+
             var success = data.success;
             if (!success) {
                 alert(data.msg);
@@ -69,13 +69,15 @@
             that.gameId = data.gameId;
             that.playerToken = data.playerToken;
 
-            socket.emit("start game", { //TODO: refactor (extract const)
+            that.socket.emit(App.events.START_GAME_EVENT, {
                 gameId: that.gameId,
                 playerToken: that.playerToken
             });
         },
 
         onGameStarted: function (data) {
+            var that = this;
+
             that.isRunning(true);
             that.guesses.removeAll();
             that.number1(1);
@@ -85,12 +87,14 @@
         },
 
         Guess: function () {
+            var that = this;
+
             if (!that.isValidNumber()) {
                 alert("Guess number cannot contain duplicating digits!");
                 return;
             }
 
-            socket.emit("guess number", { //TODO: refactor (extract const)
+            that.socket.emit(App.events.GUESS_NUMBER_EVENT, {
                 gameId: that.gameId,
                 playerToken: that.playerToken,
                 number: [that.number1(), that.number2(), that.number3(), that.number4()]
@@ -98,6 +102,8 @@
         },
 
         onGuessResponse: function (data) {
+            var that = this;
+
             var gameId = data.gameId;
             var bulls = data.bulls, cows = data.cows;
             var number = data.number;
@@ -106,7 +112,9 @@
         },
 
         Surrender: function () {
-            socket.emit("surrender game", {
+            var that = this;
+
+            that.socket.emit(App.events.SURRENDER_GAME_EVENT, {
                 gameId: this.gameId,
                 playerToken: this.playerToken
             });
@@ -115,6 +123,8 @@
         },
 
         onGameOver: function (data) {
+            var that = this;
+
             that.isRunning(false);
             var winStr = data.win ? "win" : "lose";
             var result = "Game over! You " + winStr + "! Number is: " + data.number.join('');
@@ -125,10 +135,14 @@
         },
 
         onValidate: function () {
+            var that = this;
+
             that.isValidInput(that.isValidNumber());
         },
 
         isValidNumber: function () {
+            var that = this;
+
             if (that.number1() == 0) {
                 return false;
             }

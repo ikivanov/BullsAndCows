@@ -1,12 +1,6 @@
 ﻿var ComputerVsComputerViewModel = (function () {
-    var consts = {
-        SERVER_ADDRESS: "localhost:1337"
-    };
-
-    var that;
-
     var ComputerVsComputerViewModel = function () {
-        that = this;
+        var that = this;
 
         that.isRunning = ko.observable(false);
         that.guesses = ko.observableArray();
@@ -15,7 +9,7 @@
         that.gameName = "h_vs_c";
         that.nickname = "botPlayer_" + new Date().getTime();
 
-        that.socket = null;;
+        that.socket = null;
 
         that.gameId = "";
         that.playerToken = "";
@@ -31,32 +25,38 @@
         answers: [],
 
         initSocket: function() {
-            that.socket = io.connect(consts.SERVER_ADDRESS, {'forceNew': true});
+            var that = this;
 
-            that.socket.on("create game response", function (data) {
-                that.onGameCreated(data);
+            that.socket = io.connect(App.config.SERVER_ADDRESS, { 'forceNew': true });
+
+            that.socket.on(App.events.CREATE_GAME_RESPONSE_EVENT, function (data) {
+                $.proxy(that.onGameCreated(data), that);
             });
 
-            that.socket.on("start game response", function (data) {
-                that.onGameStarted(data);
+            that.socket.on(App.events.START_GAME_RESPONSE_EVENT, function (data) {
+                $.proxy(that.onGameStarted(data), that);
             });
 
-            that.socket.on("game over", function (data) {
-                that.onGameOver(data);
+            that.socket.on(App.events.GAME_OVER_EVENT, function (data) {
+                $.proxy(that.onGameOver(data), that);
             });
         },
 
         CreateNewGame: function () {
+            var that = this;
+
             that.initSocket();
 
-            that.socket.emit("create game", { //TODO: refactor (extract const)
+            that.socket.emit(App.events.CREATE_GAME_EVENT, {
                 name: that.gameName,
                 nickname: that.nickname,
-                type: 0 //TODO: refactor
+                type: App.gameType.SINGLE_PLAYER
             });
         },
 
         onGameCreated: function (data) {
+            var that = this;
+
             var success = data.success;
             if (!success) {
                 alert(data.msg);
@@ -68,18 +68,22 @@
 
             that.botPlayer = new BotPlayer(that, that.socket, that.gameId, that.nickname, that.playerToken);
 
-            that.socket.emit("start game", { //TODO: refactor (extract const)
+            that.socket.emit(App.events.START_GAME_EVENT, {
                 gameId: that.gameId,
                 playerToken: that.playerToken
             });
         },
 
         onGameStarted: function (data) {
+            var that = this;
+
             that.isRunning(true);
             that.guesses.removeAll();
         },
 
         onGameOver: function (data) {
+            var that = this;
+
             that.isRunning(false);
             var winStr = data.win ? "win" : "lose";
             var result = "Game over! You " + winStr + "! Number is: " + data.number.join('');
@@ -92,6 +96,8 @@
         },
 
         onGuessResponse: function (data) {
+            var that = this;
+
             var bulls = data.bulls, cows = data.cows;
             var number = data.number;
 
@@ -99,6 +105,8 @@
         },
 
         showThinkingProgress: function (visible) {
+            var that = this;
+
             that.isThinking(visible);
         }
     };

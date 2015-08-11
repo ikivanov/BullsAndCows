@@ -1,14 +1,7 @@
 ﻿var MultiplayerViewModel = (function () {
-    var consts = {
-        SERVER_ADDRESS: "localhost:1337",
-    };
-
-    var that, socket;
-
     var MultiplayerViewModel = function () {
-        that = this;
+        var that = this;
 
-        socket = io(consts.SERVER_ADDRESS);
         that.step = ko.observable(0);
         that.isRunning = ko.observable(false);
         that.isMyTurn = ko.observable(false);
@@ -33,40 +26,42 @@
 
         that.bots = [],
 
-        socket.on("create game response", function (data) {
-            that.onGameCreated(data);
+        that.socket = io.connect(App.config.SERVER_ADDRESS, { 'forceNew': true });
+
+        that.socket.on(App.events.CREATE_GAME_RESPONSE_EVENT, function (data) {
+            $.proxy(that.onGameCreated(data), that);
         });
 
-        socket.on("list games response", function (data) {
-            that.onGamesListed(data);
+        that.socket.on(App.events.LIST_GAMES_RESPONSE_EVENT, function (data) {
+            $.proxy(that.onGamesListed(data), that);
         });
 
-        socket.on("list players response", function (data) {
-            that.onPlayersListed(data);
+        that.socket.on(App.events.LIST_GAME_PLAYERS_RESPONSE_EVENT, function (data) {
+            $.proxy(that.onPlayersListed(data), that);
         });
 
-        socket.on("join game response", function (data) {
-            that.onGameJoined(data);
+        that.socket.on(App.events.JOIN_GAME_RESPONSE_EVENT, function (data) {
+            $.proxy(that.onGameJoined(data), that);
         });
 
-        socket.on("start game response", function (data) {
-            that.onGameStarted(data);
+        that.socket.on(App.events.START_GAME_RESPONSE_EVENT, function (data) {
+            $.proxy(that.onGameStarted(data), that);
         });
 
-        socket.on("player turn", function (data) {
-            that.onPlayerTurn(data);
+        that.socket.on(App.events.PLAYER_TURN_SERVER_EVENT, function (data) {
+            $.proxy(that.onPlayerTurn(data), that);
         });
 
-        socket.on("guess number response", function (data) {
-            that.onGuessResponse(data);
+        that.socket.on(App.events.GUESS_NUMBER_RESPONSE_EVENT, function (data) {
+            $.proxy(that.onGuessResponse(data), that);
         });
 
-        socket.on("game over", function (data) {
-            that.onGameOver(data);
+        that.socket.on(App.events.GAME_OVER_EVENT, function (data) {
+            $.proxy(that.onGameOver(data), that);
         });
 
-        socket.on("nickname exists response", function (data) {
-            that.onNicknameExistsResponse(data);
+        that.socket.on(App.events.CHECK_NICKNAME_EXISTS_RESPONSE_EVENT, function (data) {
+            $.proxy(that.onNicknameExistsResponse(data), that);
         });
 
         that.ListGames();
@@ -75,13 +70,17 @@
     MultiplayerViewModel.prototype = {
         constructor: MultiplayerViewModel,
 
-        ListGames: function() {
-            socket.emit("list games", { //TODO: refactor (extract const)
-                type: 1 //TODO: refactor
+        ListGames: function () {
+            var that = this;
+
+            that.socket.emit(App.events.LIST_GAMES_EVENT, {
+                type: App.gameType.MULTIPLAYER
             });
         },
 
         onGamesListed: function(data) {
+            var that = this;
+
             var success = data.success;
             if (!success) {
                 alert(data.msg);
@@ -92,14 +91,18 @@
         },
 
         CreateGame: function () {
-            socket.emit("create game", { //TODO: refactor (extract const)
+            var that = this;
+
+            that.socket.emit(App.events.CREATE_GAME_EVENT, {
                 name: that.gameName(),
                 nickname: that.nickname(),
-                type: 1 //TODO: refactor
+                type: App.gameType.MULTIPLAYER
             });
         },
 
         onGameCreated: function(data) {
+            var that = this;
+
             var success = data.success;
             if (!success) {
                 alert(data.msg);
@@ -117,26 +120,32 @@
         },
 
         JoinGame: function () {
-            socket.emit("nickname exists", { //TODO: refactor (extract const)
+            var that = this;
+
+            that.socket.emit(App.events.CHECK_NICKNAME_EXISTS_EVENT, {
                 gameId: that.selectedGame().id,
                 nickname: that.nickname()
             });
         },
 
         onNicknameExistsResponse: function (data) {
+            var that = this;
+
             var exists = data.exists;
             if (exists) {
                 alert(data.msg);
                 return;
             }
 
-            socket.emit("join game", { //TODO: refactor (extract const)
+            that.socket.emit(App.events.JOIN_GAME_EVENT, {
                 gameId: that.selectedGame().id,
                 nickname: that.nickname()
             });
         },
 
         onGameJoined: function(data) {
+            var that = this;
+
             var success = data.success;
             if (!success) {
                 alert(data.msg);
@@ -156,13 +165,17 @@
         },
 
         ListPlayers: function () {
-            socket.emit("list players", { //TODO: refactor (extract const)
+            var that = this;
+
+            that.socket.emit(App.events.LIST_GAME_PLAYERS_EVENT, {
                 gameId: that.gameId,
                 playerToken: that.playerToken
             });
         },
 
         onPlayersListed: function(data) {
+            var that = this;
+
             var success = data.success;
             if (!success) {
                 alert(data.msg);
@@ -173,13 +186,17 @@
         },
 
         StartGame: function () {
-            socket.emit("start game", { //TODO: refactor (extract const)
+            var that = this;
+
+            that.socket.emit(App.events.START_GAME_EVENT, {
                 gameId: that.gameId,
                 playerToken: that.playerToken
             });
         },
 
         onGameStarted: function(data) {
+            var that = this;
+
             var success = data.success;
             if (!success) {
                 alert(data.msg);
@@ -191,18 +208,22 @@
         },
 
         onPlayerTurn: function(data) {
+            var that = this;
+
             if (data.nickname == that.nickname()) {
                 that.isMyTurn(true);
             }
         },
 
         Guess: function() {
+            var that = this;
+
             if (!that.isValidNumber()) {
                 alert("Guess number cannot contain duplicating digits!");
                 return;
             }
 
-            socket.emit("guess number", { //TODO: refactor (extract const)
+            that.socket.emit(App.events.GUESS_NUMBER_EVENT, {
                 gameId: that.gameId,
                 playerToken: that.playerToken,
                 number: [that.number1(), that.number2(), that.number3(), that.number4()]
@@ -212,6 +233,8 @@
         },
 
         onGuessResponse: function(data) {
+            var that = this;
+
             var bulls = data.bulls, cows = data.cows;
             var number = data.number;
 
@@ -219,7 +242,9 @@
         },
 
         AddBot: function () {
-            var botSocket = io.connect(consts.SERVER_ADDRESS, { 'forceNew': true });
+            var that = this;
+
+            var botSocket = io.connect(App.config.SERVER_ADDRESS, { 'forceNew': true });
             var nickname = "botPlayer_" + new Date().getTime();
 
             var bot = new BotPlayer(null, botSocket, that.gameId, nickname);
@@ -227,10 +252,14 @@
         },
 
         onValidate: function () {
+            var that = this;
+
             that.isValidInput(that.isValidNumber());
         },
 
         isValidNumber: function () {
+            var that = this;
+
             if (that.number1() == 0) {
                 return false;
             }
@@ -247,6 +276,8 @@
         },
 
         onGameOver: function (data) {
+            var that = this;
+
             that.isGameOver(true);
             that.isRunning(false);
 
@@ -256,8 +287,7 @@
             that.guesses.push(result);
 
             that.gameId = "";
-        },
-
+        }
     };
 
     return MultiplayerViewModel;

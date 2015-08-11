@@ -1,13 +1,6 @@
 ﻿var BotPlayer = (function () {
-    var consts = {
-        SERVER_ADDRESS: "localhost:1337",
-        NUMBER_LENGH: 4
-    };
-
-    var that;
-
     var BotPlayer = function (viewModel, socket, gameId, nickname, playerToken) {
-        that = this;
+        var that = this;
 
         that.viewModel = viewModel;
         that.socket = socket;
@@ -15,39 +8,42 @@
         that.playerToken = playerToken;
         that.nickname = nickname ? nickname : "botPlayer_" + Date().getTime();
 
-        that.socket.on("guess number response", function (data) {
-            that.onGuessResponse(data);
+        that.socket.on(App.events.GUESS_NUMBER_RESPONSE_EVENT, function (data) {
+            $.proxy(that.onGuessResponse(data), that);
         });
 
-        that.socket.on("player turn", function (data) {
-            that.onPlayerTurn(data);
+        that.socket.on(App.events.PLAYER_TURN_SERVER_EVENT, function (data) {
+            $.proxy(that.onPlayerTurn(data), that);
         });
 
-        that.socket.on("join game response", function (data) {
-            that.onGameJoined(data);
+        that.socket.on(App.events.JOIN_GAME_RESPONSE_EVENT, function (data) {
+            $.proxy(that.onGameJoined(data), that);
         });
 
-        that.answers = that.getPermutations(consts.NUMBER_LENGH, "123456789");
+        that.answers = that.getPermutations(App.consts.NUMBER_LENGH, "123456789");
         that.answers = that.shuffle(that.answers);
     };
 
     BotPlayer.prototype = {
         constructor: BotPlayer,
 
-        joinGame: function(gameId) {
-            that.socket.emit("join game", { //TODO: refactor (extract const)
+        joinGame: function (gameId) {
+            var that = this;
+
+            that.socket.emit(App.events.JOIN_GAME_EVENT, {
                 gameId: gameId,
                 nickname: that.nickname
             });
         },
 
         onGameJoined: function (data) {
+            var that = this;
             var success = data.success;
+
             if (!success) {
                 return;
             }
 
-            //bug: nickname can be changed from server if there is another user with the same nickname!
             if (that.nickname == data.nickname) { 
                 that.gameId = data.gameId;
                 that.playerToken = data.playerToken;
@@ -55,16 +51,19 @@
         },
 
         onPlayerTurn: function (data) {
+            var that = this;
+
             if (data.nickname == that.nickname) {
                 that.guess();
             }
         },
 
         guess: function () {
+            var that = this;
             var guessNum = that.answers[0];
             var arr = guessNum.split('');
 
-            that.socket.emit("guess number", {
+            that.socket.emit(App.events.GUESS_NUMBER_EVENT, {
                 gameId: that.gameId,
                 playerToken: that.playerToken,
                 number: [arr[0], arr[1], arr[2], arr[3]]
@@ -72,6 +71,7 @@
         },
 
         onGuessResponse: function (data) {
+            var that = this;
             var gameId = data.gameId;
             var bulls = data.bulls, cows = data.cows;
             var number = data.number;
@@ -84,9 +84,11 @@
         },
 
         reduceAnswers: function (guess, bulls, cows) {
+            var that = this;
+
             for (var i = that.answers.length - 1; i >= 0; i--) {
                 var tb = 0, tc = 0;
-                for (var ix = 0; ix < consts.NUMBER_LENGH; ix++)
+                for (var ix = 0; ix < App.consts.NUMBER_LENGH; ix++)
                     if (that.answers[i][ix] == guess[ix])
                         tb++;
                     else if (that.answers[i].indexOf(guess[ix]) >= 0)
@@ -97,6 +99,8 @@
         },
 
         getPermutations: function (n, word) {
+            var that = this;
+
             var tmpPermutation = [];
 
             if (!word || word.length == 0 || n <= 0) {
@@ -118,6 +122,8 @@
 
         //Fisher–Yates Shuffle
         shuffle: function (array) {
+            var that = this;
+
             var m = array.length, t, i;
 
             // While there remain elements to shuffle…
