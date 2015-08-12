@@ -96,6 +96,7 @@
     <Content Include="multiplayer.html" />
     <Content Include="peer2peer.html" />
     <Content Include="styles\main.css" />
+    <Content Include="viewModels\baseViewModel.js" />
     <Content Include="viewModels\computerVsComputerViewModel.js" />
     <Content Include="viewModels\humanVsComputerViewModel.js" />
     <Content Include="viewModels\peer2peerViewModel.js" />
