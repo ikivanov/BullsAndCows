@@ -54,15 +54,17 @@
             return false;
         }
 
-        var result =
-            that.number1() != that.number2() &&
-            that.number1() != that.number3() &&
-            that.number1() != that.number4() &&
-            that.number2() != that.number3() &&
-            that.number2() != that.number4() &&
-            that.number3() != that.number4();
+        var nums = [that.number1(), that.number2(), that.number3(), that.number4()];
 
-        return result;
+        //are numbers different from each other?
+        for (var i = 0; i < nums.length; i++) {
+            for (var j = nums.length - 1; j > i; j--) {
+                if (nums[i] == nums[j])
+                    return false;
+            }
+        }
+
+        return true;
     }
 
     return BaseViewModel;
