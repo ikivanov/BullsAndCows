@@ -15,6 +15,7 @@
         PLAYER_NOT_FOUND_MSG: "Player does not exist or has been expired!",
 
         NUMBER_SIZE: 4,
+        NUMBER_OF_ALLOWED_MOVES: 10,
         EXPIRATION_TIME_MINUTES: 120 
     };
 

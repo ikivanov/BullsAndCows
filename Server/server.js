@@ -206,14 +206,14 @@ var Server = (function () {
                 return;
             }
             
-            if (game.numberOfMoves == 10) {
+            if (game.numberOfMoves == consts.NUMBER_OF_ALLOWED_MOVES) {
                 that.gameOver(socket, gameId, false);
                 
                 return;
             }
             
             var bullscows = game.checkGuessNumber(player, guessNum);
-            if (bullscows.bulls == 4) {
+            if (bullscows.bulls == consts.NUMBER_SIZE) {
                 that.gameOver(socket, gameId, true);
                 
                 return;
