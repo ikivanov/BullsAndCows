@@ -1,4 +1,4 @@
-﻿var Peer2PeerViewModel = (function () {
+﻿define(["knockout", "socket.io", "jquery", "js/consts", "viewModels/BaseViewModel"], function (ko, io, $, consts, BaseViewModel) {
     Peer2PeerViewModel.prototype = new BaseViewModel;
     function Peer2PeerViewModel() {
         var that = this;
@@ -33,47 +33,47 @@
 
         BaseViewModel.prototype.initSocket.call(that);
 
-        that.socket.on(App.events.CREATE_GAME_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.CREATE_GAME_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGameCreated(data), that);
         });
 
-        that.socket.on(App.events.LIST_GAMES_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.LIST_GAMES_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGamesListed(data), that);
         });
 
-        that.socket.on(App.events.LIST_GAME_PLAYERS_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.LIST_GAME_PLAYERS_RESPONSE_EVENT, function (data) {
             $.proxy(that.onPlayersListed(data), that);
         });
 
-        that.socket.on(App.events.JOIN_GAME_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.JOIN_GAME_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGameJoined(data), that);
         });
 
-        that.socket.on(App.events.START_GAME_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.START_GAME_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGameStarted(data), that);
         });
 
-        that.socket.on(App.events.PLAYER_TURN_SERVER_EVENT, function (data) {
+        that.socket.on(consts.events.PLAYER_TURN_SERVER_EVENT, function (data) {
             $.proxy(that.onPlayerTurn(data), that);
         });
 
-        that.socket.on(App.events.GUESS_NUMBER_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.GUESS_NUMBER_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGuessResponse(data), that);
         });
 
-        that.socket.on(App.events.GAME_OVER_EVENT, function (data) {
+        that.socket.on(consts.events.GAME_OVER_EVENT, function (data) {
             $.proxy(that.onGameOver(data), that);
         });
 
-        that.socket.on(App.events.CHECK_NICKNAME_EXISTS_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.CHECK_NICKNAME_EXISTS_RESPONSE_EVENT, function (data) {
             $.proxy(that.onNicknameExistsResponse(data), that);
         });
 
-        that.socket.on(App.events.GUESS_PEER_NUMBER_SERVER_EVENT, function (data) {
+        that.socket.on(consts.events.GUESS_PEER_NUMBER_SERVER_EVENT, function (data) {
             $.proxy(that.onGuessPeerIncomingQuery(data), that);
         });
 
-        that.socket.on(App.events.GUESS_PEER_NUMBER_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.GUESS_PEER_NUMBER_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGuessPeerNumberResponse(data), that);
         });
     }
@@ -81,12 +81,12 @@
     Peer2PeerViewModel.prototype.ListGames = function () {
         var that = this;
 
-        that.socket.emit(App.events.LIST_GAMES_EVENT, {
-            type: App.gameType.PEER_2_PEER
+        that.socket.emit(consts.events.LIST_GAMES_EVENT, {
+            type: consts.gameType.PEER_2_PEER
         });
     },
 
-    Peer2PeerViewModel.prototype.onGamesListed = function(data) {
+    Peer2PeerViewModel.prototype.onGamesListed = function (data) {
         var that = this;
 
         var success = data.success;
@@ -105,14 +105,14 @@
             that.initSocket();
         }
 
-        that.socket.emit(App.events.CREATE_GAME_EVENT, {
+        that.socket.emit(consts.events.CREATE_GAME_EVENT, {
             name: that.gameName(),
             nickname: that.nickname(),
-            type: App.gameType.PEER_2_PEER
+            type: consts.gameType.PEER_2_PEER
         });
     }
 
-    Peer2PeerViewModel.prototype.onGameCreated = function(data) {
+    Peer2PeerViewModel.prototype.onGameCreated = function (data) {
         var that = this;
 
         var success = data.success;
@@ -131,12 +131,12 @@
         that.step(1);
     }
 
-    Peer2PeerViewModel.prototype.onGuessPeerIncomingQuery = function(data) {
+    Peer2PeerViewModel.prototype.onGuessPeerIncomingQuery = function (data) {
         var that = this;
 
-        var bullscows = {bulls: 0, cows: 0};
+        var bullscows = { bulls: 0, cows: 0 };
 
-        that.socket.emit(App.events.GUESS_PEER_NUMBER_CLIENT_RESPONSE_EVENT, {
+        that.socket.emit(consts.events.GUESS_PEER_NUMBER_CLIENT_RESPONSE_EVENT, {
             gameId: that.gameId,
             playerToken: that.playerToken,
             nickname: that.nickname(),
@@ -147,7 +147,7 @@
         });
     }
 
-    Peer2PeerViewModel.prototype.onGuessPeerNumberResponse = function(data){
+    Peer2PeerViewModel.prototype.onGuessPeerNumberResponse = function (data) {
         var that = this;
     }
 
@@ -158,7 +158,7 @@
             that.initSocket();
         }
 
-        that.socket.emit(App.events.CHECK_NICKNAME_EXISTS_EVENT, {
+        that.socket.emit(consts.events.CHECK_NICKNAME_EXISTS_EVENT, {
             gameId: that.selectedGame().id,
             nickname: that.nickname()
         });
@@ -173,13 +173,13 @@
             return;
         }
 
-        that.socket.emit(App.events.JOIN_GAME_EVENT, {
+        that.socket.emit(consts.events.JOIN_GAME_EVENT, {
             gameId: that.selectedGame().id,
             nickname: that.nickname()
         });
     }
 
-    Peer2PeerViewModel.prototype.onGameJoined = function(data) {
+    Peer2PeerViewModel.prototype.onGameJoined = function (data) {
         var that = this;
 
         var success = data.success;
@@ -203,13 +203,13 @@
     Peer2PeerViewModel.prototype.ListPlayers = function () {
         var that = this;
 
-        that.socket.emit(App.events.LIST_GAME_PLAYERS_EVENT, {
+        that.socket.emit(consts.events.LIST_GAME_PLAYERS_EVENT, {
             gameId: that.gameId,
             playerToken: that.playerToken
         });
     }
 
-    Peer2PeerViewModel.prototype.onPlayersListed = function(data) {
+    Peer2PeerViewModel.prototype.onPlayersListed = function (data) {
         var that = this;
 
         var success = data.success;
@@ -224,13 +224,13 @@
     Peer2PeerViewModel.prototype.StartGame = function () {
         var that = this;
 
-        that.socket.emit(App.events.START_GAME_EVENT, {
+        that.socket.emit(consts.events.START_GAME_EVENT, {
             gameId: that.gameId,
             playerToken: that.playerToken
         });
     }
 
-    Peer2PeerViewModel.prototype.onGameStarted = function(data) {
+    Peer2PeerViewModel.prototype.onGameStarted = function (data) {
         var that = this;
 
         var success = data.success;
@@ -243,7 +243,7 @@
         that.step(2);
     }
 
-    Peer2PeerViewModel.prototype.onPlayerTurn = function(data) {
+    Peer2PeerViewModel.prototype.onPlayerTurn = function (data) {
         var that = this;
 
         if (data.nickname == that.nickname()) {
@@ -251,7 +251,7 @@
         }
     }
 
-    Peer2PeerViewModel.prototype.Guess = function() {
+    Peer2PeerViewModel.prototype.Guess = function () {
         var that = this;
 
         if (!that.isValidNumber()) {
@@ -259,7 +259,7 @@
             return;
         }
 
-        that.socket.emit(App.events.GUESS_PEER_NUMBER_EVENT, {
+        that.socket.emit(consts.events.GUESS_PEER_NUMBER_EVENT, {
             gameId: that.gameId,
             playerToken: that.playerToken,
             number: [that.number1(), that.number2(), that.number3(), that.number4()]
@@ -268,7 +268,7 @@
         that.isMyTurn(false);
     }
 
-    Peer2PeerViewModel.prototype.onGuessResponse = function(data) {
+    Peer2PeerViewModel.prototype.onGuessResponse = function (data) {
         var that = this;
 
         var bulls = data.bulls, cows = data.cows;
@@ -280,7 +280,7 @@
     Peer2PeerViewModel.prototype.AddBot = function () {
         var that = this;
 
-        var botSocket = io.connect(App.config.SERVER_ADDRESS, { 'forceNew': true });
+        var botSocket = io.connect(consts.config.SERVER_ADDRESS, { 'forceNew': true });
         var nickname = "botPlayer_" + new Date().getTime();
 
         var bot = new BotPlayer(null, botSocket, that.gameId, nickname);
@@ -288,4 +288,4 @@
     }
 
     return Peer2PeerViewModel;
-})();
+});

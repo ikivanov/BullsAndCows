@@ -1,4 +1,4 @@
-﻿var BaseViewModel = (function () {
+﻿define(["knockout", "socket.io", "js/consts"], function (ko, io, consts) {
     function BaseViewModel() {
         var that = this;
 
@@ -22,7 +22,7 @@
     BaseViewModel.prototype.initSocket = function () {
         var that = this;
 
-        that.socket = io.connect(App.config.SERVER_ADDRESS, { 'forceNew': true });
+        that.socket = io.connect(consts.config.SERVER_ADDRESS, { 'forceNew': true });
     }
 
     BaseViewModel.prototype.onGameOver = function (data) {
@@ -68,4 +68,4 @@
     }
 
     return BaseViewModel;
-})();
+});

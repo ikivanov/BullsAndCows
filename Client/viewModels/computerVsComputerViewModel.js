@@ -1,6 +1,6 @@
-﻿var ComputerVsComputerViewModel = (function () {
+﻿define(["knockout", "socket.io", "jquery", "js/consts", "viewModels/BaseViewModel", "js/botPlayer"], function (ko, io, $, consts, BaseViewModel, BotPlayer) {
     ComputerVsComputerViewModel.prototype = new BaseViewModel;
-    function ComputerVsComputerViewModel () {
+    function ComputerVsComputerViewModel() {
         var that = this;
 
         BaseViewModel.call(that);
@@ -14,42 +14,39 @@
         that.botPlayer = null;
     };
 
-    ComputerVsComputerViewModel.prototype.initSocket = function()
-    {
+    ComputerVsComputerViewModel.prototype.initSocket = function () {
         BaseViewModel.prototype.initSocket.call(that);
 
         var that = this;
 
-        that.socket = io.connect(App.config.SERVER_ADDRESS, { 'forceNew': true });
+        that.socket = io.connect(consts.config.SERVER_ADDRESS, { 'forceNew': true });
 
-        that.socket.on(App.events.CREATE_GAME_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.CREATE_GAME_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGameCreated(data), that);
         });
 
-        that.socket.on(App.events.START_GAME_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.START_GAME_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGameStarted(data), that);
         });
 
-        that.socket.on(App.events.GAME_OVER_EVENT, function (data) {
+        that.socket.on(consts.events.GAME_OVER_EVENT, function (data) {
             $.proxy(that.onGameOver(data), that);
         });
     }
 
-    ComputerVsComputerViewModel.prototype.CreateNewGame = function()
-    {
+    ComputerVsComputerViewModel.prototype.CreateNewGame = function () {
         var that = this;
 
         that.initSocket();
 
-        that.socket.emit(App.events.CREATE_GAME_EVENT, {
+        that.socket.emit(consts.events.CREATE_GAME_EVENT, {
             name: that.gameName,
             nickname: that.nickname,
-            type: App.gameType.SINGLE_PLAYER
+            type: consts.gameType.SINGLE_PLAYER
         });
     }
 
-    ComputerVsComputerViewModel.prototype.onGameCreated = function(data)
-    {
+    ComputerVsComputerViewModel.prototype.onGameCreated = function (data) {
         var that = this;
 
         var success = data.success;
@@ -63,7 +60,7 @@
 
         that.botPlayer = new BotPlayer(that, that.socket, that.gameId, that.nickname, that.playerToken);
 
-        that.socket.emit(App.events.START_GAME_EVENT, {
+        that.socket.emit(consts.events.START_GAME_EVENT, {
             gameId: that.gameId,
             playerToken: that.playerToken
         });
@@ -92,4 +89,4 @@
     }
 
     return ComputerVsComputerViewModel;
-})();
+});

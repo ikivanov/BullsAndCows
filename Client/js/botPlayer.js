@@ -1,26 +1,26 @@
-﻿var BotPlayer = (function () {
-    var BotPlayer = function (viewModel, socket, gameId, nickname, playerToken) {
+﻿define(["jquery", "js/consts"], function ($, consts) {
+    function BotPlayer(viewModel, socket, gameId, nickname, playerToken) {
         var that = this;
 
         that.viewModel = viewModel;
         that.socket = socket;
         that.gameId = gameId;
         that.playerToken = playerToken;
-        that.nickname = nickname ? nickname : "botPlayer_" + Date().getTime();
+        that.nickname = nickname ? nickname : "botPlayer_" + new Date().getTime();
 
-        that.socket.on(App.events.GUESS_NUMBER_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.GUESS_NUMBER_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGuessResponse(data), that);
         });
 
-        that.socket.on(App.events.PLAYER_TURN_SERVER_EVENT, function (data) {
+        that.socket.on(consts.events.PLAYER_TURN_SERVER_EVENT, function (data) {
             $.proxy(that.onPlayerTurn(data), that);
         });
 
-        that.socket.on(App.events.JOIN_GAME_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.JOIN_GAME_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGameJoined(data), that);
         });
 
-        that.answers = that.getPermutations(App.consts.NUMBER_LENGH, "123456789");
+        that.answers = that.getPermutations(consts.consts.NUMBER_LENGH, "123456789");
         that.answers = that.shuffle(that.answers);
     };
 
@@ -30,7 +30,7 @@
         joinGame: function (gameId) {
             var that = this;
 
-            that.socket.emit(App.events.JOIN_GAME_EVENT, {
+            that.socket.emit(consts.events.JOIN_GAME_EVENT, {
                 gameId: gameId,
                 nickname: that.nickname
             });
@@ -44,7 +44,7 @@
                 return;
             }
 
-            if (that.nickname == data.nickname) { 
+            if (that.nickname == data.nickname) {
                 that.gameId = data.gameId;
                 that.playerToken = data.playerToken;
             }
@@ -63,7 +63,7 @@
             var guessNum = that.answers[0];
             var arr = guessNum.split('');
 
-            that.socket.emit(App.events.GUESS_NUMBER_EVENT, {
+            that.socket.emit(consts.events.GUESS_NUMBER_EVENT, {
                 gameId: that.gameId,
                 playerToken: that.playerToken,
                 number: [arr[0], arr[1], arr[2], arr[3]]
@@ -88,7 +88,7 @@
 
             for (var i = that.answers.length - 1; i >= 0; i--) {
                 var tb = 0, tc = 0;
-                for (var ix = 0; ix < App.consts.NUMBER_LENGH; ix++)
+                for (var ix = 0; ix < consts.consts.NUMBER_LENGH; ix++)
                     if (that.answers[i][ix] == guess[ix])
                         tb++;
                     else if (that.answers[i].indexOf(guess[ix]) >= 0)
@@ -143,4 +143,4 @@
     };
 
     return BotPlayer;
-})();
+});

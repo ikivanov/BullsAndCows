@@ -1,10 +1,10 @@
-﻿var HumanVsComputerViewModel = (function () {
+﻿define(["knockout", "socket.io", "jquery", "js/consts", "viewModels/BaseViewModel"], function (ko, io, $, consts, BaseViewModel) {
     HumanVsComputerViewModel.prototype = new BaseViewModel;
     function HumanVsComputerViewModel() {
         var that = this;
 
         BaseViewModel.call(that);
-        
+
         that.isRunning = ko.observable(false);
     }
 
@@ -13,19 +13,19 @@
 
         BaseViewModel.prototype.initSocket.call(that);
 
-        that.socket.on(App.events.CREATE_GAME_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.CREATE_GAME_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGameCreated(data), that);
         });
 
-        that.socket.on(App.events.START_GAME_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.START_GAME_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGameStarted(data), that);
         });
 
-        that.socket.on(App.events.GUESS_NUMBER_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.GUESS_NUMBER_RESPONSE_EVENT, function (data) {
             $.proxy(that.onGuessResponse(data), that);
         });
 
-        that.socket.on(App.events.GAME_OVER_EVENT, function (data) {
+        that.socket.on(consts.events.GAME_OVER_EVENT, function (data) {
             $.proxy(that.onGameOver(data), that);
         });
     }
@@ -35,10 +35,10 @@
 
         that.initSocket();
 
-        that.socket.emit(App.events.CREATE_GAME_EVENT, {
+        that.socket.emit(consts.events.CREATE_GAME_EVENT, {
             name: "unknown_h_vs_c",
             nickname: "guest",
-            type: App.gameType.SINGLE_PLAYER
+            type: consts.gameType.SINGLE_PLAYER
         });
     }
 
@@ -54,7 +54,7 @@
         that.gameId = data.gameId;
         that.playerToken = data.playerToken;
 
-        that.socket.emit(App.events.START_GAME_EVENT, {
+        that.socket.emit(consts.events.START_GAME_EVENT, {
             gameId: that.gameId,
             playerToken: that.playerToken
         });
@@ -79,7 +79,7 @@
             return;
         }
 
-        that.socket.emit(App.events.GUESS_NUMBER_EVENT, {
+        that.socket.emit(consts.events.GUESS_NUMBER_EVENT, {
             gameId: that.gameId,
             playerToken: that.playerToken,
             number: [that.number1(), that.number2(), that.number3(), that.number4()]
@@ -99,7 +99,7 @@
     HumanVsComputerViewModel.prototype.Surrender = function () {
         var that = this;
 
-        that.socket.emit(App.events.SURRENDER_GAME_EVENT, {
+        that.socket.emit(consts.events.SURRENDER_GAME_EVENT, {
             gameId: this.gameId,
             playerToken: this.playerToken
         });
@@ -108,4 +108,4 @@
     }
 
     return HumanVsComputerViewModel;
-})();
+});
