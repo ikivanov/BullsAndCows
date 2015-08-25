@@ -78,9 +78,9 @@
 
             that.reduceAnswers(number.join(''), bulls, cows);
 
-            if (that.viewModel) {
-                that.viewModel.onGuessResponse(data);
-            }
+            //if (that.viewModel) {
+            //    that.viewModel.onGuessResponse(data);
+            //}
         },
 
         reduceAnswers: function (guess, bulls, cows) {

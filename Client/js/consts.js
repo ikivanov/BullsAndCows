@@ -8,7 +8,10 @@
             NUMBER_LENGH: 4,
             MISSING_HOST_ELEMENT_MESSAGE: "Host element cannot be null, undentified or an empty string!",
             INVALID_HOST_ELEMENT_MESSAGE: "Invalid host element! A valid html element identifier or jquery html object should be provided!",
-            INVALID_PLAYER_MODE_MESSAGE: "Invalid player mode!"
+            INVALID_PLAYER_MODE_MESSAGE: "Invalid player mode!",
+            MISSING_GAME_NAME_MESSAGE: "Game name should be specified before starting a new game!",
+            MISSING_NICKNAME_MESSAGE: "A non empty nickname should be specified before starting a new game!",
+            MISSING_GAME_TYPE_MESSAGE: "Game type should be specified before starting a new game!"
         },
 
         gameType: {

@@ -8,67 +8,25 @@
         that.isRunning = ko.observable(false);
     }
 
-    HumanVsComputerViewModel.prototype.initSocket = function () {
+    HumanVsComputerViewModel.prototype.CreateGame = function () {
         var that = this;
 
-        BaseViewModel.prototype.initSocket.call(that);
+        that.gameName("h_vs_c" + new Date().getTime());
+        that.nickname("guest");
+        that.gameType(consts.gameType.SINGLE_PLAYER);
 
-        that.socket.on(consts.events.CREATE_GAME_RESPONSE_EVENT, function (data) {
-            $.proxy(that.onGameCreated(data), that);
-        });
-
-        that.socket.on(consts.events.START_GAME_RESPONSE_EVENT, function (data) {
-            $.proxy(that.onGameStarted(data), that);
-        });
-
-        that.socket.on(consts.events.GUESS_NUMBER_RESPONSE_EVENT, function (data) {
-            $.proxy(that.onGuessResponse(data), that);
-        });
-
-        that.socket.on(consts.events.GAME_OVER_EVENT, function (data) {
-            $.proxy(that.onGameOver(data), that);
-        });
-    }
-
-    HumanVsComputerViewModel.prototype.CreateNewGame = function () {
-        var that = this;
-
-        that.initSocket();
-
-        that.socket.emit(consts.events.CREATE_GAME_EVENT, {
-            name: "unknown_h_vs_c",
-            nickname: "guest",
-            type: consts.gameType.SINGLE_PLAYER
-        });
+        BaseViewModel.prototype.CreateGame.call(that);
     }
 
     HumanVsComputerViewModel.prototype.onGameCreated = function (data) {
         var that = this;
 
-        var success = data.success;
-        if (!success) {
-            alert(data.msg);
-            return;
-        }
-
-        that.gameId = data.gameId;
-        that.playerToken = data.playerToken;
+        BaseViewModel.prototype.onGameCreated.call(that, data);
 
         that.socket.emit(consts.events.START_GAME_EVENT, {
             gameId: that.gameId,
             playerToken: that.playerToken
         });
-    }
-
-    HumanVsComputerViewModel.prototype.onGameStarted = function (data) {
-        var that = this;
-
-        that.isRunning(true);
-        that.guesses.removeAll();
-        that.number1(1);
-        that.number2(2);
-        that.number3(3);
-        that.number4(4);
     }
 
     HumanVsComputerViewModel.prototype.Guess = function () {
@@ -84,16 +42,6 @@
             playerToken: that.playerToken,
             number: [that.number1(), that.number2(), that.number3(), that.number4()]
         });
-    }
-
-    HumanVsComputerViewModel.prototype.onGuessResponse = function (data) {
-        var that = this;
-
-        var gameId = data.gameId;
-        var bulls = data.bulls, cows = data.cows;
-        var number = data.number;
-
-        that.guesses.push("number: " + number.join('') + ", bulls: " + bulls + ", cows: " + cows);
     }
 
     HumanVsComputerViewModel.prototype.Surrender = function () {
