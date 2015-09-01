@@ -135,16 +135,22 @@ var Game = (function () {
             }
             
             if (that.type != gameType.SINGLE_PLAYER) {
-                if (that.currentPlayerIndex == that.players.length - 1) {
-                    that.currentPlayerIndex = 0;
-                } else {
-                    that.currentPlayerIndex++;
-                }
+                that.updateCurrentPlayerIndex();
             }
 
             that.numberOfMoves++;
             
             return res;
+        },
+
+        updateCurrentPlayerIndex: function () {
+            var that = this;
+
+            if (that.currentPlayerIndex == that.players.length - 1) {
+                that.currentPlayerIndex = 0;
+            } else {
+                that.currentPlayerIndex++;
+            }
         }
     };
     

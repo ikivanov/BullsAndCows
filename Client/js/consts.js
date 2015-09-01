@@ -46,6 +46,8 @@
             GUESS_PEER_NUMBER_RESPONSE_EVENT: "guess peer number response",
 
             GAME_OVER_EVENT: "game over",
+            GAME_OVER_PEER_CLIENT_EVENT: "game over peer client",
+            GAME_OVER_PEER_SERVER_EVENT: "game over peer server",
 
             JOIN_GAME_EVENT: "join game",
             JOIN_GAME_RESPONSE_EVENT: "join game response",

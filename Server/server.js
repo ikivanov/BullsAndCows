@@ -67,6 +67,10 @@ var Server = (function () {
                 socket.on(events.CHECK_NICKNAME_EXISTS_EVENT, function (data) {
                     that.checkNicknameExists(socket, data);
                 });
+
+                socket.on(events.GAME_OVER_PEER_CLIENT_EVENT, function (data) {
+                    that.gameOverPeerClient(socket, data);
+                });
             });
         },
         
@@ -257,6 +261,8 @@ var Server = (function () {
                 return;
             }
             
+            game.updateCurrentPlayerIndex();
+            
             socket.broadcast.to(game.id).emit(events.GUESS_PEER_NUMBER_SERVER_EVENT, {
                 number: data.number
             });
@@ -274,7 +280,15 @@ var Server = (function () {
             if (!that.ensurePlayer(socket, game, playerToken, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
             
             socket.broadcast.to(game.id).emit(events.GUESS_PEER_NUMBER_RESPONSE_EVENT, {
-                number: data.number
+                number: data.number,
+                bulls: data.bulls,
+                cows: data.cows
+            });
+
+            var nextTurnPlayer = game.getNextTurnPlayer();
+
+            that.io.to(game.id).emit(events.PLAYER_TURN_SERVER_EVENT, {
+                nickname: nextTurnPlayer.nickname
             });
         },
         
@@ -398,30 +412,24 @@ var Server = (function () {
             });
         },
         
-        //posts a secret number, this method is relevant for Peer 2 Peer game mode only
-        //this method has private access, only players joined the current game are allowed to call it
-        postSecretNumber: function (socket, data) {
-            //TODO:
-        },
-        
-        //leaves the current game        
-        //this method has private access, only players joined the current game are allowed to call it
-        leaveGame: function (socket, data) {
-            //TODO:
-        },
-
-        //destroys the current game
-        //this method has private access, only game creator is allowed to call it
-        destroyGame: function (socket, data) {
-            //TODO:
-        },
-
         gameOver: function (socket, gameId, win) {
             var that = this;
 
             var game = that.runningGames[gameId];
             that.io.to(game.id).emit(events.GAME_OVER_EVENT, { gameId: gameId, number: game.secretNumber, win: win });
             
+            that.runningGames[gameId] = null;
+            delete that.runningGames[gameId];
+        },
+
+        gameOverPeerClient: function (socket, data) {
+            var that = this;
+
+            var gameId = data.gameId;
+            var game = that.runningGames[gameId];
+
+            that.io.to(game.id).emit(events.GAME_OVER_PEER_SERVER_EVENT, { gameId: gameId, nickname: data.nickname, number: data.number });
+
             that.runningGames[gameId] = null;
             delete that.runningGames[gameId];
         }

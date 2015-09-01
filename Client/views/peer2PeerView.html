@@ -106,52 +106,84 @@
         </table>
     </div>
 
-    <table class="game_table" data-bind="visible: (step() == 2)">
+    <table data-bind="visible: (step() == 2)">
         <tbody>
             <tr>
                 <td>
-                    <input type="number" class="guess_number_textbox" min="1" max="9" data-bind="enable: isRunning, value: number1, event: {change: onValidate}" />
+                    <table class="game_table">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <input type="number" class="guess_number_textbox" min="1" max="9" data-bind="enable: isRunning, value: number1, event: {change: onValidate}" />
+                                </td>
+                                <td>
+                                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number2, event: {change: onValidate}" />
+                                </td>
+                                <td>
+                                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number3, event: {change: onValidate}" />
+                                </td>
+                                <td>
+                                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number4, event: {change: onValidate}" />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="4">
+                                    <button id="guess_button"
+                                            data-bind="enable: (isRunning() && isValidInput() && isMyTurn()), event: {click: Guess}">
+                                        Make a guess
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="4">
+                                    <span class="validation_footer" data-bind="visible: !isValidInput()">Guess number cannot contain duplicating digits!</span>
+                                </td>
+
+                            </tr>
+
+                            <tr>
+                                <td colspan="4">
+                                    <select id="server_output" multiple size="12" data-bind="options:guesses"></select>
+
+                                    <div class="awaiting_game_progress" data-bind="visible: (!isRunning() && !isGameOver())">
+                                        <img src="../img/waiting.gif" />
+                                        <span>Awaiting game start...</span>
+                                    </div>
+
+                                    <div class="awaiting_turn_progress" data-bind="visible: (isRunning() && !isMyTurn())">
+                                        <img src="../img/waiting.gif" />
+                                        <span>Please wait for your turn...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </td>
                 <td>
-                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number2, event: {change: onValidate}" />
-                </td>
-                <td>
-                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number3, event: {change: onValidate}" />
-                </td>
-                <td>
-                    <input type="number" class="guess_number_textbox" min="0" max="9" data-bind="enable: isRunning, value: number4, event: {change: onValidate}" />
-                </td>
-            </tr>
-
-            <tr>
-                <td colspan="4">
-                    <button id="guess_button"
-                            data-bind="enable: (isRunning() && isValidInput() && isMyTurn()), event: {click: Guess}">
-                        Make a guess
-                    </button>
-                </td>
-            </tr>
-
-            <tr>
-                <td colspan="4">
-                    <span class="validation_footer" data-bind="visible: !isValidInput()">Guess number cannot contain duplicating digits!</span>
-                </td>
-
-            </tr>
-
-            <tr>
-                <td colspan="4">
-                    <select id="server_output" multiple size="12" data-bind="options:guesses"></select>
-
-                    <div class="awaiting_game_progress" data-bind="visible: (!isRunning() && !isGameOver())">
-                        <img src="../img/waiting.gif" />
-                        <span>Awaiting game start...</span>
-                    </div>
-
-                    <div class="awaiting_turn_progress" data-bind="visible: (isRunning() && !isMyTurn())">
-                        <img src="../img/waiting.gif" />
-                        <span>Please wait for your turn...</span>
-                    </div>
+                    <table class="game_table">
+                        <tr>
+                            <td>
+                                <br />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Opponent guesses
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <select id="server_opponent_output" multiple size="12" data-bind="options:opponentGuesses"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <br />
+                            </td>
+                        </tr>
+                    </table>
                 </td>
             </tr>
         </tbody>

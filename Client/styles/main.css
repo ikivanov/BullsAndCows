@@ -7,7 +7,7 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-#workspace {
+.workspace {
     width: 350px;
     background-color: white;
     opacity: 1;
@@ -26,6 +26,10 @@ body {
     background: -ms-linear-gradient(top, #d0e4f7 0%,#73b1e7 24%,#0a77d5 50%,#539fe1 79%,#87bcea 100%); /* IE10+ */
     background: linear-gradient(to bottom, #d0e4f7 0%,#73b1e7 24%,#0a77d5 50%,#539fe1 79%,#87bcea 100%); /* W3C */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', endColorstr='#87bcea',GradientType=0 ); /* IE6-9 */
+}
+
+.p2p_workspace {
+    width: 550px;
 }
 
 label {
@@ -117,6 +121,10 @@ label {
 }
 
 #server_output {
+    width: 260px;
+}
+
+#server_opponent_output {
     width: 260px;
 }
 
