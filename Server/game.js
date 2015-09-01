@@ -18,7 +18,7 @@ var Game = (function () {
         that.secretNumber = generateSecretNumber();
 
         that.numberOfMoves = 0;
-        that.currentPlayerIndex = 0;
+        that.currentPlayerIndex = -1;
         that.players = [];
 
         that.isStarted = false;
@@ -99,9 +99,37 @@ var Game = (function () {
             return nickname;
         },
         
+        getCurrentTurnPlayer: function () {
+            var that = this;
+            
+            if (that.type == gameType.SINGLE_PLAYER) {
+                if (that.players.length > 0) {
+                    return that.players[0];
+                } else {
+                    return null;
+                }
+            }
+            
+            if (that.currentPlayerIndex == -1) {
+                return null;
+            }            
+            
+            return that.players[that.currentPlayerIndex];
+        },
+
         getNextTurnPlayer: function () {
             var that = this;
-
+            
+            if (that.type == gameType.SINGLE_PLAYER) {
+                return that.getCurrentTurnPlayer();
+            }
+            
+            if (that.currentPlayerIndex == that.players.length - 1) {
+                that.currentPlayerIndex = 0;
+            } else {
+                that.currentPlayerIndex++;
+            }
+            
             return that.players[that.currentPlayerIndex];
         },
 
@@ -134,23 +162,9 @@ var Game = (function () {
                 bulls: bulls, cows: cows
             }
             
-            if (that.type != gameType.SINGLE_PLAYER) {
-                that.updateCurrentPlayerIndex();
-            }
-
             that.numberOfMoves++;
             
             return res;
-        },
-
-        updateCurrentPlayerIndex: function () {
-            var that = this;
-
-            if (that.currentPlayerIndex == that.players.length - 1) {
-                that.currentPlayerIndex = 0;
-            } else {
-                that.currentPlayerIndex++;
-            }
         }
     };
     

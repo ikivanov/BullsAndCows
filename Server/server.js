@@ -202,7 +202,7 @@ var Server = (function () {
 
             var player = game.getPlayerByTokenKey(playerToken);
 
-            if (player != game.getNextTurnPlayer()) {
+            if (player != game.getCurrentTurnPlayer()) {
                 socket.emit(events.GUESS_NUMBER_RESPONSE_EVENT, {
                     success: false,
                     msg: "It is not your turn!"
@@ -253,15 +253,13 @@ var Server = (function () {
             
             var player = game.getPlayerByTokenKey(playerToken);
             
-            if (player != game.getNextTurnPlayer()) {
+            if (player != game.getCurrentTurnPlayer()) {
                 socket.emit(events.GUESS_NUMBER_RESPONSE_EVENT, {
                     success: false,
                     msg: "It is not your turn!"
                 });
                 return;
             }
-            
-            game.updateCurrentPlayerIndex();
             
             socket.broadcast.to(game.id).emit(events.GUESS_PEER_NUMBER_SERVER_EVENT, {
                 number: data.number
