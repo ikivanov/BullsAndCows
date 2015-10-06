@@ -21,10 +21,14 @@
 
         that.botPlayer = new BotPlayer(that, that.socket, that.gameId, that.nickname(), that.playerToken);
 
-        that.socket.emit(consts.events.START_GAME_EVENT, {
-            gameId: that.gameId,
-            playerToken: that.playerToken
-        });
+        that.socket.emit(consts.events.START_GAME_EVENT,
+            {
+                gameId: that.gameId,
+                playerToken: that.playerToken
+            },
+            function (data) {
+                BaseViewModel.prototype.onGameStarted.call(that, data);
+            });
     }
 
     ComputerVsComputerViewModel.prototype.showThinkingProgress = function (visible) {

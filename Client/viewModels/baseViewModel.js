@@ -31,18 +31,6 @@
         that.socket.on(consts.events.GAME_OVER_EVENT, function (data) {
             $.proxy(that.onGameOver(data), that);
         });
-
-        that.socket.on(consts.events.CREATE_GAME_RESPONSE_EVENT, function (data) {
-            $.proxy(that.onGameCreated(data), that);
-        });
-
-        that.socket.on(consts.events.START_GAME_RESPONSE_EVENT, function (data) {
-            $.proxy(that.onGameStarted(data), that);
-        });
-
-        that.socket.on(consts.events.GUESS_NUMBER_RESPONSE_EVENT, function (data) {
-            $.proxy(that.onGuessResponse(data), that);
-        });
     }
 
     BaseViewModel.prototype.CreateGame = function () {
@@ -56,10 +44,14 @@
             that.initSocket();
         }
 
-        that.socket.emit(consts.events.CREATE_GAME_EVENT, {
-            name: that.gameName(),
-            nickname: that.nickname(),
-            type: that.gameType()
+        that.socket.emit(consts.events.CREATE_GAME_EVENT,
+            {
+                name: that.gameName(),
+                nickname: that.nickname(),
+                type: that.gameType()
+            },
+            function (data) {
+                that.onGameCreated.call(that, data);
         });
     }
 

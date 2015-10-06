@@ -29,16 +29,14 @@
 
         events: {
             CREATE_GAME_EVENT: "create game",
-            CREATE_GAME_RESPONSE_EVENT: "create game response",
 
             START_GAME_EVENT: "start game",
-            START_GAME_RESPONSE_EVENT: "start game response",
+            GAME_STARTED_SERVER_EVENT: "game started server event",
 
             SURRENDER_GAME_EVENT: "surrender game",
-            SURRENDER_GAME_RESPONSE_EVENT: "surrender game response",
 
             GUESS_NUMBER_EVENT: "guess number",
-            GUESS_NUMBER_RESPONSE_EVENT: "guess number response",
+            GUESS_NUMBER_SERVER_EVENT: "guess number server event",
 
             GUESS_PEER_NUMBER_EVENT: "guess peer number",
             GUESS_PEER_NUMBER_SERVER_EVENT: "check peer number",
@@ -50,13 +48,12 @@
             GAME_OVER_PEER_SERVER_EVENT: "game over peer server",
 
             JOIN_GAME_EVENT: "join game",
-            JOIN_GAME_RESPONSE_EVENT: "join game response",
+            JOIN_GAME_SERVER_EVENT: "join server game",
 
             LIST_GAMES_EVENT: "list games",
             LIST_GAMES_RESPONSE_EVENT: "list games response",
 
             LIST_GAME_PLAYERS_EVENT: "list players",
-            LIST_GAME_PLAYERS_RESPONSE_EVENT: "list players response",
 
             POST_NUMBER_EVENT: "post number",
             POST_NUMBER_RESPONSE_EVENT: "post number response",

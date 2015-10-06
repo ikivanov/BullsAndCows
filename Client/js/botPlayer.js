@@ -8,16 +8,8 @@
         that.playerToken = playerToken;
         that.nickname = nickname ? nickname : "botPlayer_" + new Date().getTime();
 
-        that.socket.on(consts.events.GUESS_NUMBER_RESPONSE_EVENT, function (data) {
-            $.proxy(that.onGuessResponse(data), that);
-        });
-
         that.socket.on(consts.events.PLAYER_TURN_SERVER_EVENT, function (data) {
             $.proxy(that.onPlayerTurn(data), that);
-        });
-
-        that.socket.on(consts.events.JOIN_GAME_RESPONSE_EVENT, function (data) {
-            $.proxy(that.onGameJoined(data), that);
         });
 
         that.answers = that.getPermutations(consts.consts.NUMBER_LENGH, "123456789");
@@ -30,10 +22,15 @@
         joinGame: function (gameId) {
             var that = this;
 
-            that.socket.emit(consts.events.JOIN_GAME_EVENT, {
-                gameId: gameId,
-                nickname: that.nickname
-            });
+            that.socket.emit(consts.events.JOIN_GAME_EVENT,
+                {
+                    gameId: gameId,
+                    nickname: that.nickname
+                },
+                function (data) {
+                    that.onGameJoined.call(that, data);
+                }
+            );
         },
 
         onGameJoined: function (data) {
@@ -63,11 +60,16 @@
             var guessNum = that.answers[0];
             var arr = guessNum.split('');
 
-            that.socket.emit(consts.events.GUESS_NUMBER_EVENT, {
-                gameId: that.gameId,
-                playerToken: that.playerToken,
-                number: [arr[0], arr[1], arr[2], arr[3]]
-            });
+            that.socket.emit(consts.events.GUESS_NUMBER_EVENT,
+                {
+                    gameId: that.gameId,
+                    playerToken: that.playerToken,
+                    number: [arr[0], arr[1], arr[2], arr[3]]
+                },
+                function (data) {
+                    that.onGuessResponse.call(that, data);
+                }
+            );
         },
 
         onGuessResponse: function (data) {
@@ -78,9 +80,9 @@
 
             that.reduceAnswers(number.join(''), bulls, cows);
 
-            //if (that.viewModel) {
-            //    that.viewModel.onGuessResponse(data);
-            //}
+            if (that.viewModel) {
+                that.viewModel.onGuessResponse(data);
+            }
         },
 
         reduceAnswers: function (guess, bulls, cows) {

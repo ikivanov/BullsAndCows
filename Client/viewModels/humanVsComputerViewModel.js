@@ -23,9 +23,13 @@
 
         BaseViewModel.prototype.onGameCreated.call(that, data);
 
-        that.socket.emit(consts.events.START_GAME_EVENT, {
-            gameId: that.gameId,
-            playerToken: that.playerToken
+        that.socket.emit(consts.events.START_GAME_EVENT,
+            {
+                gameId: that.gameId,
+                playerToken: that.playerToken
+            },
+            function (data) {
+                BaseViewModel.prototype.onGameStarted.call(that, data);
         });
     }
 
@@ -37,20 +41,32 @@
             return;
         }
 
-        that.socket.emit(consts.events.GUESS_NUMBER_EVENT, {
-            gameId: that.gameId,
-            playerToken: that.playerToken,
-            number: [that.number1(), that.number2(), that.number3(), that.number4()]
-        });
+        that.socket.emit(consts.events.GUESS_NUMBER_EVENT,
+            {
+                gameId: that.gameId,
+                playerToken: that.playerToken,
+                number: [that.number1(), that.number2(), that.number3(), that.number4()]
+            },
+            function (data) {
+                BaseViewModel.prototype.onGuessResponse.call(that, data);
+            }
+        );
     }
 
     HumanVsComputerViewModel.prototype.Surrender = function () {
         var that = this;
 
-        that.socket.emit(consts.events.SURRENDER_GAME_EVENT, {
-            gameId: this.gameId,
-            playerToken: this.playerToken
-        });
+        that.socket.emit(consts.events.SURRENDER_GAME_EVENT,
+            {
+                gameId: this.gameId,
+                playerToken: this.playerToken
+            },
+            function (data) {
+                if (!data.success) {
+                    alert(data.msg);
+                }
+            }
+        );
 
         that.isRunning(false);
     }

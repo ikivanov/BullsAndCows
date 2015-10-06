@@ -18,15 +18,7 @@
 
         BaseViewModel.prototype.initSocket.call(that);
 
-        that.socket.on(consts.events.LIST_GAMES_RESPONSE_EVENT, function (data) {
-            $.proxy(that.onGamesListed(data), that);
-        });
-
-        that.socket.on(consts.events.LIST_GAME_PLAYERS_RESPONSE_EVENT, function (data) {
-            $.proxy(that.onPlayersListed(data), that);
-        });
-
-        that.socket.on(consts.events.JOIN_GAME_RESPONSE_EVENT, function (data) {
+        that.socket.on(consts.events.JOIN_GAME_SERVER_EVENT, function (data) {
             $.proxy(that.onGameJoined(data), that);
         });
 
@@ -34,8 +26,12 @@
             $.proxy(that.onPlayerTurn(data), that);
         });
 
-        that.socket.on(consts.events.CHECK_NICKNAME_EXISTS_RESPONSE_EVENT, function (data) {
-            $.proxy(that.onNicknameExistsResponse(data), that);
+        that.socket.on(consts.events.GAME_STARTED_SERVER_EVENT, function (data) {
+            $.proxy(that.onGameStarted(data), that);
+        });
+
+        that.socket.on(consts.events.GUESS_NUMBER_SERVER_EVENT, function (data) {
+            $.proxy(that.onGuessNumber(data), that);
         });
     }
 
@@ -54,9 +50,14 @@
     BaseMultiplayerViewModel.prototype.ListGames = function () {
         var that = this;
 
-        that.socket.emit(consts.events.LIST_GAMES_EVENT, {
-            type: that.gameType()
-        });
+        that.socket.emit(consts.events.LIST_GAMES_EVENT,
+            {
+                type: that.gameType()
+            },
+            function (data) {
+                that.onGamesListed(data);
+            }
+        );
     },
 
     BaseMultiplayerViewModel.prototype.onGamesListed = function (data) {
@@ -71,6 +72,16 @@
         that.gamesList(data.gamesList);
     }
 
+    BaseMultiplayerViewModel.prototype.onGuessNumber = function (data) {
+        var that = this;
+
+        if (data.nickname == that.nickname()) {
+            return;
+        }
+
+        that.onGuessResponse(data);
+    }
+
     BaseMultiplayerViewModel.prototype.JoinGame = function () {
         var that = this;
 
@@ -81,6 +92,8 @@
         that.socket.emit(consts.events.CHECK_NICKNAME_EXISTS_EVENT, {
             gameId: that.selectedGame().id,
             nickname: that.nickname()
+        }, function (data) {
+            that.onNicknameExistsResponse(data);
         });
     }
 
@@ -96,6 +109,8 @@
         that.socket.emit(consts.events.JOIN_GAME_EVENT, {
             gameId: that.selectedGame().id,
             nickname: that.nickname()
+        }, function (data) {
+            that.onGameJoined(data);
         });
     }
 
@@ -123,10 +138,15 @@
     BaseMultiplayerViewModel.prototype.ListPlayers = function () {
         var that = this;
 
-        that.socket.emit(consts.events.LIST_GAME_PLAYERS_EVENT, {
-            gameId: that.gameId,
-            playerToken: that.playerToken
-        });
+        that.socket.emit(consts.events.LIST_GAME_PLAYERS_EVENT,
+            {
+                gameId: that.gameId,
+                playerToken: that.playerToken
+            },
+            function (data) {
+                that.onPlayersListed(data);
+            }
+        );
     }
 
     BaseMultiplayerViewModel.prototype.onPlayersListed = function (data) {
@@ -147,6 +167,8 @@
         that.socket.emit(consts.events.START_GAME_EVENT, {
             gameId: that.gameId,
             playerToken: that.playerToken
+        }, function (data) {
+            that.onGameStarted(data);
         });
     }
 
@@ -178,9 +200,10 @@
             gameId: that.gameId,
             playerToken: that.playerToken,
             number: [that.number1(), that.number2(), that.number3(), that.number4()]
+        }, function (data) {
+            that.onGuessResponse(data);
+            that.isMyTurn(false);
         });
-
-        that.isMyTurn(false);
     }
 
     BaseMultiplayerViewModel.prototype.onGuessResponse = function (data) {

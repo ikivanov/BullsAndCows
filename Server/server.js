@@ -4,6 +4,7 @@ var Token = require("./token").Token;
 
 var events = require("./consts").events;
 var consts = require("./consts").consts;
+var gameType = require("./consts").gameType;
 
 //Server class is responsible for low level socket comunication
 //and delegates most of the business logic to the Game and Player classes
@@ -24,48 +25,48 @@ var Server = (function () {
             var that = this;
 
             that.io.on('connection', function (socket) {
-                socket.on(events.CREATE_GAME_EVENT, function (data) {
-                    that.createGame(socket, data); //create channel with id = roomId
+                socket.on(events.CREATE_GAME_EVENT, function (data, callback) {
+                    that.createGame(socket, data, callback); //create channel with id = roomId
                 });
 
-                socket.on(events.JOIN_GAME_EVENT, function (data) {
-                    that.joinGame(socket, data); //join channel with id = roomId
+                socket.on(events.JOIN_GAME_EVENT, function (data, callback) {
+                    that.joinGame(socket, data, callback); //join channel with id = roomId
                 });
 
-                socket.on(events.START_GAME_EVENT, function (data) {
-                    that.startGame(socket, data);
+                socket.on(events.START_GAME_EVENT, function (data, callback) {
+                    that.startGame(socket, data, callback);
                 });
 
-                socket.on(events.LIST_GAMES_EVENT, function (data) {
-                    that.listGames(socket, data);
+                socket.on(events.LIST_GAMES_EVENT, function (data, callback) {
+                    that.listGames(socket, data, callback);
                 });
 
-                socket.on(events.LIST_GAME_PLAYERS_EVENT, function (data) {
-                    that.listPlayers(socket, data);
+                socket.on(events.LIST_GAME_PLAYERS_EVENT, function (data, callback) {
+                    that.listPlayers(socket, data, callback);
                 });
 
-                socket.on(events.SURRENDER_GAME_EVENT, function (data) {
-                    that.surrenderGame(socket, data);
+                socket.on(events.SURRENDER_GAME_EVENT, function (data, callback) {
+                    that.surrenderGame(socket, data, callback);
                 });
 
-                socket.on(events.GUESS_NUMBER_EVENT, function (data) {
-                    that.guessNumber(socket, data);
+                socket.on(events.GUESS_NUMBER_EVENT, function (data, callback) {
+                    that.guessNumber(socket, data, callback);
                 });
 
-                socket.on(events.GUESS_PEER_NUMBER_EVENT, function (data) {
-                    that.guessPeerNumber(socket, data);
+                socket.on(events.GUESS_PEER_NUMBER_EVENT, function (data, callback) {
+                    that.guessPeerNumber(socket, data, callback);
                 });
 
-                socket.on(events.GUESS_PEER_NUMBER_CLIENT_RESPONSE_EVENT, function (data) {
-                    that.guessPeerNumberClientResponse(socket, data);
+                socket.on(events.GUESS_PEER_NUMBER_CLIENT_RESPONSE_EVENT, function (data, callback) {
+                    that.guessPeerNumberClientResponse(socket, data, callback);
                 });
 
                 socket.on(events.POST_NUMBER_EVENT, function (data) {
                     that.postSecretNumber(socket, data);
                 });
 
-                socket.on(events.CHECK_NICKNAME_EXISTS_EVENT, function (data) {
-                    that.checkNicknameExists(socket, data);
+                socket.on(events.CHECK_NICKNAME_EXISTS_EVENT, function (data, callback) {
+                    that.checkNicknameExists(socket, data, callback);
                 });
 
                 socket.on(events.GAME_OVER_PEER_CLIENT_EVENT, function (data) {
@@ -74,30 +75,34 @@ var Server = (function () {
             });
         },
         
-        ensureGame: function (socket, gameId, eventName) {
+        ensureGame: function (socket, gameId, callback) {
             var that = this;
 
             var game = that.runningGames[gameId];
             if (!game) {
-                socket.emit(eventName, {
-                    success: false,
-                    msg: consts.GAME_NOT_FOUND_MSG
-                });
+                if (callback) {
+                    callback({
+                        success: false,
+                        msg: consts.GAME_NOT_FOUND_MSG
+                    });
+                }
                 return false;
             }
 
             return true;
         },
         
-        ensurePlayer: function(socket, game, playerToken, eventName) {
+        ensurePlayer: function(socket, game, playerToken, callback) {
             var that = this;
 
             var player = game.getPlayerByTokenKey(playerToken);
             if (!player) {
-                socket.emit(eventName, {
-                    success: false,
-                    msg: consts.PLAYER_NOT_FOUND_MSG
-                });
+                if (callback) {
+                    callback({
+                        success: false,
+                        msg: consts.PLAYER_NOT_FOUND_MSG
+                    });
+                }
                 return false;
             }
 
@@ -106,7 +111,7 @@ var Server = (function () {
         
         //creates new game with one player, the game creator
         //this method has public access, everyone is allowed to call it
-        createGame: function (socket, data) {
+        createGame: function (socket, data, callback) {
             var that = this;
 
             try {
@@ -117,93 +122,114 @@ var Server = (function () {
                 that.runningGames[game.id] = game;
                 
                 socket.join(game.id)
-
-                socket.emit(events.CREATE_GAME_RESPONSE_EVENT, {
-                    success: true,
-                    gameId: game.id, 
-                    playerToken: player.token.key,
-                    name: game.name,
-                    msg: consts.CREATED_GAME_SUCCESS_MSG
-                });
+                
+                if (callback) {
+                    callback({
+                        success: true,
+                        gameId: game.id, 
+                        playerToken: player.token.key,
+                        name: game.name,
+                        msg: consts.CREATED_GAME_SUCCESS_MSG
+                    });
+                }
             }
             catch (e) {
-                socket.emit(events.CREATE_GAME_RESPONSE_EVENT, {
-                    success: false,
-                    msg: consts.CREATED_GAME_ERROR_MSG + " " + e
-                });
+                if (callback) {
+                    callback({
+                        success: false,
+                        msg: consts.CREATED_GAME_ERROR_MSG + " " + e
+                    });
+                }
             }
         },
         
         //starts an existing game        
         //this method has private access, only game creator is allowed to call it
-        startGame: function (socket, data) {
+        startGame: function (socket, data, callback) {
             var that = this;
 
             var gameId = data.gameId;
             var playerToken = data.playerToken;
             
-            if (!that.ensureGame(socket, gameId, events.START_GAME_RESPONSE_EVENT)) return;
+            if (!that.ensureGame(socket, gameId, callback)) return;
             
             var game = that.runningGames[gameId];
-            if (!that.ensurePlayer(socket, game, playerToken, events.START_GAME_RESPONSE_EVENT)) return;
+            if (!that.ensurePlayer(socket, game, playerToken, callback)) return;
             
-            that.io.to(game.id).emit(events.START_GAME_RESPONSE_EVENT, {
-                success: true,
-                msg: consts.STARTED_GAME_SUCCESS_MSG
-            });
-
-            //send PLAYER_TURN_SERVER_EVENT to all the players of the room
-            var player = game.getNextTurnPlayer();
-
-            that.io.to(game.id).emit(events.PLAYER_TURN_SERVER_EVENT, {
-                nickname: player.nickname
-            });
+            game.start();
+            
+            if (callback) {
+                callback({
+                    success: true,
+                    msg: consts.STARTED_GAME_SUCCESS_MSG
+                });
+            
+                //send PLAYER_TURN_SERVER_EVENT to all the players of the room
+                var player = game.getNextTurnPlayer();
+                
+                that.io.to(game.id).emit(events.PLAYER_TURN_SERVER_EVENT, {
+                    nickname: player.nickname
+                });
+            }
+            
+            if (game.type != gameType.SINGLE_PLAYER) {
+                that.io.to(game.id).emit(events.GAME_STARTED_SERVER_EVENT, {
+                    success: true,
+                    msg: consts.STARTED_GAME_SUCCESS_MSG
+                });
+            }
         },
 
         //surrenders an existing game
         //this method has private access, only game creator is allowed to call it
-        surrenderGame: function (socket, data) {
+        surrenderGame: function (socket, data, callback) {
             var that = this;
 
             var gameId = data.gameId;
             var playerToken = data.playerToken;
             
-            if (!that.ensureGame(socket, gameId, events.SURRENDER_GAME_RESPONSE_EVENT)) return;
+            if (!that.ensureGame(socket, gameId, callback)) return;
 
             var game = that.runningGames[gameId];
-            if (!that.ensurePlayer(socket, game, playerToken, events.SURRENDER_GAME_RESPONSE_EVENT)) return;
+            if (!that.ensurePlayer(socket, game, playerToken, callback)) return;
 
             var player = game.getPlayerByTokenKey(playerToken);
-            if (!player.isGameCreator) {
-                socket.emit(events.SURRENDER_GAME_RESPONSE_EVENT, {
-                    success: false,
-                    msg: consts.SURRENDER_GAME_ERROR_MSG
-                });
-                return;
+            if (callback) {
+                if (!player.isGameCreator) {
+                    callback({
+                        success: false,
+                        msg: consts.SURRENDER_GAME_ERROR_MSG
+                    });
+                    return;
+                } else {
+                    callback({
+                        success: true,
+                        msg: "OK!"
+                    });
+                }
             }
-            
             that.gameOver(socket, gameId, false);
         },
         
         //tries to guess the secret number
         //this method has private access, only players joined the current game are allowed to call it
         //additionaly, in mutiplayer mode, only the player who is on move is allowed to call the method
-        guessNumber: function (socket, data) {
+        guessNumber: function (socket, data, callback) {
             var that = this;
 
             var gameId = data.gameId;
             var playerToken = data.playerToken;
             var guessNum = data.number;
             
-            if (!that.ensureGame(socket, gameId, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
+            if (!that.ensureGame(socket, gameId, callback)) return;
             
             var game = that.runningGames[gameId];
-            if (!that.ensurePlayer(socket, game, playerToken, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
+            if (!that.ensurePlayer(socket, game, playerToken, callback)) return;
 
             var player = game.getPlayerByTokenKey(playerToken);
 
             if (player != game.getCurrentTurnPlayer()) {
-                socket.emit(events.GUESS_NUMBER_RESPONSE_EVENT, {
+                callback({
                     success: false,
                     msg: "It is not your turn!"
                 });
@@ -223,38 +249,50 @@ var Server = (function () {
                 return;
             }
             
-            that.io.to(game.id).emit(events.GUESS_NUMBER_RESPONSE_EVENT, {
-                nickname: player.nickname,
-                success: true,
-                number: guessNum, 
-                bulls: bullscows.bulls, 
-                cows: bullscows.cows
-            });
+            if (callback) {
+                callback({
+                    nickname: player.nickname,
+                    success: true,
+                    number: guessNum, 
+                    bulls: bullscows.bulls, 
+                    cows: bullscows.cows
+                });
 
-            //send PLAYER_TURN_SERVER_EVENT to all the players of the room
-            var nextTurnPlayer = game.getNextTurnPlayer();
+                if (game.type == gameType.MULTIPLAYER || game.type == gameType.PEER_2_PEER) {
+                    that.io.to(game.id).emit(events.GUESS_NUMBER_SERVER_EVENT, { //send GUESS_NUMBER_SERVER_EVENT so all players can see the current player turn
+                        nickname: player.nickname,
+                        success: true,
+                        number: guessNum, 
+                        bulls: bullscows.bulls, 
+                        cows: bullscows.cows
+                    });
+                }
+
+                //send PLAYER_TURN_SERVER_EVENT to all the players of the room
+                var nextTurnPlayer = game.getNextTurnPlayer();
                 
-            that.io.to(game.id).emit(events.PLAYER_TURN_SERVER_EVENT, {
-                nickname: nextTurnPlayer.nickname
-            });
+                that.io.to(game.id).emit(events.PLAYER_TURN_SERVER_EVENT, {
+                    nickname: nextTurnPlayer.nickname
+                });
+            }
         },
         
-        guessPeerNumber: function (socket, data) {
+        guessPeerNumber: function (socket, data, callback) {
             var that = this;
             
             var gameId = data.gameId;
             var playerToken = data.playerToken;
             var guessNum = data.number;
             
-            if (!that.ensureGame(socket, gameId, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
+            if (!that.ensureGame(socket, gameId, callback)) return;
             
             var game = that.runningGames[gameId];
-            if (!that.ensurePlayer(socket, game, playerToken, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
+            if (!that.ensurePlayer(socket, game, playerToken, callback)) return;
             
             var player = game.getPlayerByTokenKey(playerToken);
             
             if (player != game.getCurrentTurnPlayer()) {
-                socket.emit(events.GUESS_NUMBER_RESPONSE_EVENT, {
+                callback({
                     success: false,
                     msg: "It is not your turn!"
                 });
@@ -266,16 +304,16 @@ var Server = (function () {
             });
         },
         
-        guessPeerNumberClientResponse: function (socket, data) {
+        guessPeerNumberClientResponse: function (socket, data, callback) {
             var that = this;
 
             var gameId = data.gameId;
             var playerToken = data.playerToken;
 
-            if (!that.ensureGame(socket, gameId, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
+            if (!that.ensureGame(socket, gameId, callback)) return;
             
             var game = that.runningGames[gameId];
-            if (!that.ensurePlayer(socket, game, playerToken, events.GUESS_NUMBER_RESPONSE_EVENT)) return;
+            if (!that.ensurePlayer(socket, game, playerToken, callback)) return;
             
             socket.broadcast.to(game.id).emit(events.GUESS_PEER_NUMBER_RESPONSE_EVENT, {
                 number: data.number,
@@ -292,16 +330,15 @@ var Server = (function () {
         
         //joins a player to an existing game
         //this method has public access, everyone is allowed to call it
-        joinGame: function (socket, data) {
+        joinGame: function (socket, data, callback) {
             var that = this;
 
             var gameId = data.gameId;
             var game = that.runningGames[gameId];
             if (!game) {
-                socket.emit(events.JOIN_GAME_RESPONSE_EVENT, {
-                    success: false,
-                    msg: consts.JOIN_GAME_ERROR
-                });
+                if (callback) {
+                    callback({ success: false, msg: consts.JOIN_GAME_ERROR});
+                }
 
                 return;
             }
@@ -313,16 +350,25 @@ var Server = (function () {
                 game.addPlayer(player);
             }
             catch (e) {
-                socket.emit(events.JOIN_GAME_RESPONSE_EVENT, {
-                    success: false,
-                    msg: e
-                });
+                if (callback) {
+                    callback({ success: false, msg: e});
+                }
                 return;
             }
             
             socket.join(game.id);
+            
+            if (callback) {
+                callback({
+                    success: true,
+                    gameId: gameId,
+                    playerToken: player.token.key,
+                    nickname: player.nickname,
+                    msg: consts.JOIN_GAME_SUCCESS
+                });
+            }
 
-            that.io.to(game.id).emit(events.JOIN_GAME_RESPONSE_EVENT, {
+            that.io.to(game.id).emit(events.JOIN_GAME_SERVER_EVENT, {
                 success: true,
                 gameId: gameId,
                 playerToken: player.token.key,
@@ -333,7 +379,7 @@ var Server = (function () {
         
         //lists all available non-runing, multiplayer games
         //this method has public access, everyone is allowed to call it
-        listGames: function (socket, data) {
+        listGames: function (socket, data, callback) {
             var that = this;
 
             var type = data.type;
@@ -349,33 +395,37 @@ var Server = (function () {
                     name: game.name
                 });
             }
-
-            socket.emit(events.LIST_GAMES_RESPONSE_EVENT, {
-                success: true,
-                gamesList: gamesList,
-                msg: "OK"
-            });
+            
+            if (callback) {
+                callback({
+                    success: true,
+                    gamesList: gamesList,
+                    msg: "OK"
+                });
+            }
         },
         
         //lists all players who join the current game
         //this method has private access, only the creator of the current game is allowed to call it
-        listPlayers: function (socket, data) {
+        listPlayers: function (socket, data, callback) {
             var that = this;
 
             var gameId = data.gameId;
             var playerToken = data.playerToken;
             
-            if (!that.ensureGame(socket, gameId, events.LIST_GAME_PLAYERS_RESPONSE_EVENT)) return;
+            if (!that.ensureGame(socket, gameId, callback)) return;
             
             var game = that.runningGames[gameId];
-            if (!that.ensurePlayer(socket, game, playerToken, events.LIST_GAME_PLAYERS_RESPONSE_EVENT)) return;
+            if (!that.ensurePlayer(socket, game, playerToken, callback)) return;
             
             var player = game.getPlayerByTokenKey(playerToken);
             if (!player.isGameCreator) {
-                socket.emit(events.LIST_GAME_PLAYERS_RESPONSE_EVENT, {
-                    success: false,
-                    msg: "Only the creator of the game is allowed to list the game's players!"
-                });
+                if (callback) {
+                    callback({
+                        success: false,
+                        msg: "Only the creator of the game is allowed to list the game's players!"
+                    });
+                }
                 return;
             }
 
@@ -385,29 +435,33 @@ var Server = (function () {
                 players.push(game.players[i].nickname);
             }
             
-            socket.emit(events.LIST_GAME_PLAYERS_RESPONSE_EVENT, {
-                success: true,
-                msg: "OK!",
-                players: players
-            });
+            if (callback) {
+                callback({
+                    success: true,
+                    msg: "OK!",
+                    players: players
+                });
+            }
         }, 
         
-        checkNicknameExists: function(socket, data) {
+        checkNicknameExists: function(socket, data, callback) {
             var that = this;
 
             var gameId = data.gameId;
             var nickname = data.nickname;
 
-            if (!that.ensureGame(socket, gameId, events.CHECK_NICKNAME_EXISTS_RESPONSE_EVENT)) return;
+            if (!that.ensureGame(socket, gameId, callback)) return;
             
             var game = that.runningGames[gameId];
             var exists = game.nicknameExists(nickname);
-
-            socket.emit(events.CHECK_NICKNAME_EXISTS_RESPONSE_EVENT, {
-                success: true,
-                msg: "This nickname is already in use!",
-                exists: exists
-            });
+            
+            if (callback) {
+                callback({
+                    success: true,
+                    msg: "This nickname is already in use!",
+                    exists: exists
+                });
+            }
         },
         
         gameOver: function (socket, gameId, win) {

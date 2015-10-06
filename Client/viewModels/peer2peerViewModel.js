@@ -51,6 +51,10 @@
             gameId: that.gameId,
             playerToken: that.playerToken,
             number: [that.number1(), that.number2(), that.number3(), that.number4()]
+        }, function (data) {
+            if (!data.success) {
+                alert(data.msg);
+            }
         });
 
         that.isMyTurn(false);
